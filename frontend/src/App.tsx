@@ -1,8 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Sidebar } from './components/Sidebar/Sidebar'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
-import { OnWindowResize } from '../wailsjs/go/main/App'
+import { GetSteamLibraryMeta, OnWindowResize } from '../wailsjs/go/main/App'
+import { ScreenshotsPage } from './pages/Screenshots/ScreenshotsPage'
+import { useApi } from './common/api'
+import { AppContext } from './common/app_context'
 
 function App() {
   const [queryClient] = useState(() => new QueryClient())
@@ -13,18 +16,28 @@ function App() {
   return (
     <HashRouter basename="/">
       <QueryClientProvider client={queryClient}>
-        <div id="App" className="min-h-screen flex">
-          <Sidebar className="w-64" />
-          <div>
-            <Routes>
-              <Route path="/" element={<div />} />
-              <Route path="/screenshots/*" element={<div />} />
-            </Routes>
+        <AppContextProvider>
+          <div id="App" className="min-h-screen flex">
+            <Sidebar className="w-64" />
+            <div>
+              <Routes>
+                <Route path="/" element={<div />} />
+                <Route path="/screenshots/*" element={<ScreenshotsPage />} />
+              </Routes>
+            </div>
           </div>
-        </div>
+        </AppContextProvider>
       </QueryClientProvider>
     </HashRouter>
   )
+}
+
+function AppContextProvider({ children }: React.PropsWithChildren<object>) {
+  const { data: meta } = useApi(() => GetSteamLibraryMeta(), {
+    initialData: {} as never,
+    debug: true,
+  })
+  return <AppContext.Provider value={{ meta }}>{children}</AppContext.Provider>
 }
 
 export default App
