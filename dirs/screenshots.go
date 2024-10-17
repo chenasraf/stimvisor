@@ -18,6 +18,9 @@ type ScreenshotsDir struct {
 
 func NewScreenshotsDirFromPath(path string) ScreenshotsDir {
 	dir, err := os.Open(path)
+	if os.IsNotExist(err) {
+		return ScreenshotsDir{}
+	}
 	if err != nil {
 		panic(err)
 	}

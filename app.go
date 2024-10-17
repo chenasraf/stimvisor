@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/chenasraf/stimvisor/config"
 	"github.com/chenasraf/stimvisor/dirs"
+	"github.com/chenasraf/stimvisor/steam"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -87,8 +89,35 @@ func (a *App) GetScreenshots() ScreenshotsDirs {
 	return ScreenshotsDirs{ScreenshotsDirs: screenshotsDirs}
 }
 
+type Games struct {
+	Error string           `json:"error,omitempty"`
+	Games []steam.GameInfo `json:"games"`
+}
+
+func GamesError(err error) Games {
+	return Games{Error: err.Error()}
+}
+
+func (a *App) GetGames() Games {
+	userId, err := dirs.GetUserId()
+	if err != nil {
+		return GamesError(err)
+	}
+	gameDirPaths, err := dirs.GetGameDirectories(userId)
+	if err != nil {
+		return GamesError(err)
+	}
+	games := []steam.GameInfo{}
+	for _, path := range gameDirPaths {
+		gameId := filepath.Base(path)
+		gameInfo := steam.GetGameInfo(gameId)
+		games = append(games, gameInfo)
+	}
+	return Games{Games: games}
+}
+
 func (a *App) OnWindowResize() {
-	config := GetConfig()
+	config := config.GetConfig()
 
 	w, h := runtime.WindowGetSize(a.ctx)
 	fmt.Printf("OnWindowResize: %d, %d\n", w, h)

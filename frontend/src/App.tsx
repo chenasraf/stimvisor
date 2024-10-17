@@ -6,6 +6,8 @@ import { GetSteamLibraryMeta, OnWindowResize } from '../wailsjs/go/main/App'
 import { ScreenshotsPage } from './pages/Screenshots/ScreenshotsPage'
 import { useApi } from './common/api'
 import { AppContext } from './common/app_context'
+import { LoadingContainer } from './components/Loader/LoadingContainer'
+import { GamesPage } from './pages/Games/GamesPage'
 
 function App() {
   const [queryClient] = useState(() => new QueryClient())
@@ -21,7 +23,8 @@ function App() {
             <Sidebar className="min-w-64 w-64" />
             <div className="max-h-screen overflow-y-auto">
               <Routes>
-                <Route path="/" element={<div />} />
+                <Route path="/" element={<GamesPage />} />
+                <Route path="/games" element={<GamesPage />} />
                 <Route path="/screenshots/*" element={<ScreenshotsPage />} />
               </Routes>
             </div>
@@ -37,8 +40,11 @@ function AppContextProvider({ children }: React.PropsWithChildren<object>) {
     initialData: {} as never,
     debug: true,
   })
-  if (!meta || isFetching) return <div>Loading...</div>
-  return <AppContext.Provider value={{ meta }}>{children}</AppContext.Provider>
+  return (
+    <LoadingContainer loading={isFetching}>
+      <AppContext.Provider value={{ meta }}>{children}</AppContext.Provider>
+    </LoadingContainer>
+  )
 }
 
 export default App

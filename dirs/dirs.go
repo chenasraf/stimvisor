@@ -3,6 +3,7 @@ package dirs
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"slices"
 	"strconv"
@@ -42,6 +43,11 @@ func GetSteamDirectory() (string, error) {
 		format = DARWIN_STEAM_DIR
 	}
 	return fmt.Sprintf(format, homedir), nil
+}
+
+func GetUserId() (string, error) {
+	userDir, err := GetSteamUserDirectory()
+	return filepath.Base(userDir), err
 }
 
 func GetSteamUserDirectory() (string, error) {
@@ -124,6 +130,15 @@ func GetGameDirectories(userId string) ([]string, error) {
 	return gameDirs, nil
 }
 
+func GetGameDirectory(gameId string) (string, error) {
+	userDir, err := GetSteamUserDirectory()
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%s/%s", userDir, gameId), nil
+}
+
 func GetScreenshotsDirs() ([]string, error) {
 	syncDir, err := GetSyncDirectory()
 	if err != nil {
@@ -148,4 +163,12 @@ func GetScreenshotsDirs() ([]string, error) {
 		dirs = append(dirs, scrDir)
 	}
 	return dirs, nil
+}
+
+func GetScreenshotsDir(gameId string) (string, error) {
+	syncDir, err := GetSyncDirectory()
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s/remote/%s/screenshots", syncDir, gameId), nil
 }

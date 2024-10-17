@@ -23,6 +23,38 @@ export namespace dirs {
 
 export namespace main {
 	
+	export class Games {
+	    error?: string;
+	    games: steam.GameInfo[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Games(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.error = source["error"];
+	        this.games = this.convertValues(source["games"], steam.GameInfo);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class ScreenshotsDirs {
 	    error?: string;
 	    screenshotsDirs: dirs.ScreenshotsDir[];
@@ -74,6 +106,47 @@ export namespace main {
 	        this.gameDirs = source["gameDirs"];
 	        this.syncDir = source["syncDir"];
 	    }
+	}
+
+}
+
+export namespace steam {
+	
+	export class GameInfo {
+	    id: string;
+	    name: string;
+	    installDir: string;
+	    screenshotsDir: dirs.ScreenshotsDir;
+	
+	    static createFrom(source: any = {}) {
+	        return new GameInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.installDir = source["installDir"];
+	        this.screenshotsDir = this.convertValues(source["screenshotsDir"], dirs.ScreenshotsDir);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 
 }

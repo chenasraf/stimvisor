@@ -5,6 +5,12 @@
 html {
   @apply bg-bg;
   cursor: default;
+  user-select: none;
+}
+
+input,
+textfield {
+  user-select: auto;
 }
 
 /* body { */

@@ -2,6 +2,7 @@ import { GetScreenshots } from '../../../wailsjs/go/main/App'
 import { useApi } from '../../common/api'
 import { useAppContext } from '../../common/app_context'
 import { cn } from '../../common/utils'
+import { LoadingContainer } from '../../components/Loader/LoadingContainer'
 
 function useScreenshotsDirs() {
   const { data: screenshots, ...rest } = useApi(GetScreenshots, ['screenshots'], {
@@ -23,9 +24,8 @@ export function ScreenshotsPage() {
       <h1 className="text-2xl">Screenshots</h1>
 
       <div>
-        {isFetching
-          ? 'Loading...'
-          : screenshots.screenshotsDirs.map((dir) => (
+        <LoadingContainer loading={isFetching}>
+          {screenshots.screenshotsDirs?.map((dir) => (
             <div key={dir.dir}>
               <h2>{dir.gameId}</h2>
               <div className="flex items-start gap-4 flex-wrap max-w-full">
@@ -35,6 +35,7 @@ export function ScreenshotsPage() {
               </div>
             </div>
           ))}
+        </LoadingContainer>
       </div>
 
       <details>
