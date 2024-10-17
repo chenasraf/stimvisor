@@ -5,3 +5,7 @@
 export function GetSteamLibraryMeta() {
   return window['go']['main']['App']['GetSteamLibraryMeta']();
 }
+
+export function OnWindowResize() {
+  return window['go']['main']['App']['OnWindowResize']();
+}

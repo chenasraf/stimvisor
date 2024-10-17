@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
@@ -67,4 +69,15 @@ func (a *App) GetSteamLibraryMeta() SteamLibraryMeta {
 	}
 
 	return out
+}
+
+func (a *App) OnWindowResize() {
+	config := GetConfig()
+
+	w, h := runtime.WindowGetSize(a.ctx)
+	fmt.Printf("OnWindowResize: %d, %d\n", w, h)
+	config.WindowWidth = w
+	config.WindowHeight = h
+
+	config.Save()
 }

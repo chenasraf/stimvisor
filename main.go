@@ -15,11 +15,13 @@ func main() {
 	// Create an instance of the app structure
 	app := NewApp()
 
+	config := GetConfig()
+
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "stimvisor",
-		Width:  1024,
-		Height: 768,
+		Title:  "StimVisor",
+		Width:  config.WindowWidth,
+		Height: config.WindowHeight,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},

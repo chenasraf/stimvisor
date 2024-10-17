@@ -3,3 +3,5 @@
 import {main} from '../models';
 
 export function GetSteamLibraryMeta():Promise<main.SteamLibraryMeta>;
+
+export function OnWindowResize():Promise<void>;
