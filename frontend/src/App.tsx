@@ -33,7 +33,7 @@ function App() {
 }
 
 function AppContextProvider({ children }: React.PropsWithChildren<object>) {
-  const { data: meta, isFetching } = useApi(() => GetSteamLibraryMeta(), {
+  const { data: meta, isFetching } = useApi(GetSteamLibraryMeta, ['meta'], {
     initialData: {} as never,
     debug: true,
   })

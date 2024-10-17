@@ -1,13 +1,13 @@
 export namespace dirs {
 	
-	export class ScreenshotDir {
+	export class ScreenshotsDir {
 	    dir: string;
 	    userId: string;
 	    gameId: string;
 	    screenshots: string[];
 	
 	    static createFrom(source: any = {}) {
-	        return new ScreenshotDir(source);
+	        return new ScreenshotsDir(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -23,26 +23,18 @@ export namespace dirs {
 
 export namespace main {
 	
-	export class SteamLibraryMeta {
+	export class ScreenshotsDirs {
 	    error?: string;
-	    steamDir: string;
-	    userDir: string;
-	    gameDirs: string[];
-	    screenshotsDirs: dirs.ScreenshotDir[];
-	    syncDir: string;
+	    screenshotsDirs: dirs.ScreenshotsDir[];
 	
 	    static createFrom(source: any = {}) {
-	        return new SteamLibraryMeta(source);
+	        return new ScreenshotsDirs(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.error = source["error"];
-	        this.steamDir = source["steamDir"];
-	        this.userDir = source["userDir"];
-	        this.gameDirs = source["gameDirs"];
-	        this.screenshotsDirs = this.convertValues(source["screenshotsDirs"], dirs.ScreenshotDir);
-	        this.syncDir = source["syncDir"];
+	        this.screenshotsDirs = this.convertValues(source["screenshotsDirs"], dirs.ScreenshotsDir);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -62,6 +54,26 @@ export namespace main {
 		    }
 		    return a;
 		}
+	}
+	export class SteamLibraryMeta {
+	    error?: string;
+	    steamDir: string;
+	    userDir: string;
+	    gameDirs: string[];
+	    syncDir: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SteamLibraryMeta(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.error = source["error"];
+	        this.steamDir = source["steamDir"];
+	        this.userDir = source["userDir"];
+	        this.gameDirs = source["gameDirs"];
+	        this.syncDir = source["syncDir"];
+	    }
 	}
 
 }

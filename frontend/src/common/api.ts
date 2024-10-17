@@ -1,4 +1,4 @@
-import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query'
+import { QueryKey, useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query'
 
 type FullfilledUseQueryResult<TData = unknown, TError = Error> = Omit<
   UseQueryResult<TData, TError>,
@@ -7,14 +7,14 @@ type FullfilledUseQueryResult<TData = unknown, TError = Error> = Omit<
   data: Exclude<TData, undefined>
 }
 
-type WrappedUseQueryOptions<TData, TError, TQueryFnData> = UseQueryOptions<
-  TQueryFnData,
-  TError,
-  TData
+type WrappedUseQueryOptions<TData, TError, TQueryFnData> = Omit<
+  UseQueryOptions<TQueryFnData, TError, TData>,
+  'queryKey'
 > & { debug?: boolean }
 
 export function useApi<T>(
   promise: () => Promise<T>,
+  queryKey: QueryKey,
   options: Partial<WrappedUseQueryOptions<T, Error, T>> = {},
 ): FullfilledUseQueryResult<T, Error> {
   const query = useQuery({
@@ -24,7 +24,7 @@ export function useApi<T>(
       if (options.debug) console.debug('useApi response:', json)
       return await (isError(json) ? Promise.reject(json.error) : Promise.resolve(json))
     },
-    queryKey: [],
+    queryKey,
     ...options,
   })
   return query as FullfilledUseQueryResult<T, Error>

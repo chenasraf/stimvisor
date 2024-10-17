@@ -9,20 +9,20 @@ import (
 )
 
 // screenshots: /Users/chen/Library/Application\ Support/Steam/userdata/USER_ID/760/remote/GAME_ID/screenshots
-type ScreenshotDir struct {
+type ScreenshotsDir struct {
 	Dir         string   `json:"dir"`
 	UserId      string   `json:"userId"`
 	GameId      string   `json:"gameId"`
 	Screenshots []string `json:"screenshots"`
 }
 
-func NewScreenshotDirFromPath(path string) ScreenshotDir {
+func NewScreenshotsDirFromPath(path string) ScreenshotsDir {
 	dir, err := os.Open(path)
 	if err != nil {
 		panic(err)
 	}
 	defer dir.Close()
-	s := ScreenshotDir{}
+	s := ScreenshotsDir{}
 	s.Dir = path
 	s.GameId = filepath.Base(GetDir(path, 1))
 	s.UserId = filepath.Base(GetDir(path, 4))

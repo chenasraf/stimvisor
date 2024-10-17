@@ -25,55 +25,66 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-func WrapError(err error) SteamLibraryMeta {
+func SteamLibraryMetaError(err error) SteamLibraryMeta {
 	return SteamLibraryMeta{Error: err.Error()}
 }
 
 type SteamLibraryMeta struct {
-	Error           string               `json:"error,omitempty"`
-	SteamDir        string               `json:"steamDir"`
-	UserDir         string               `json:"userDir"`
-	GameDirs        []string             `json:"gameDirs"`
-	ScreenshotsDirs []dirs.ScreenshotDir `json:"screenshotsDirs"`
-	SyncDir         string               `json:"syncDir"`
+	Error    string   `json:"error,omitempty"`
+	SteamDir string   `json:"steamDir"`
+	UserDir  string   `json:"userDir"`
+	GameDirs []string `json:"gameDirs"`
+	SyncDir  string   `json:"syncDir"`
 }
 
 func (a *App) GetSteamLibraryMeta() SteamLibraryMeta {
 	p, err := dirs.GetSteamDirectory()
 	if err != nil {
-		return WrapError(err)
+		return SteamLibraryMetaError(err)
 	}
 	userDir, err := dirs.GetSteamUserDirectory()
 	if err != nil {
-		return WrapError(err)
+		return SteamLibraryMetaError(err)
 	}
 	// fmt.Printf("User Dir: %s\n", userDir)
 	userId := filepath.Base(userDir)
 	gd, err := dirs.GetGameDirectories(userId)
 	if err != nil {
-		return WrapError(err)
+		return SteamLibraryMetaError(err)
 	}
 	syncDir, err := dirs.GetSyncDirectory()
 	if err != nil {
-		return WrapError(err)
-	}
-	screenshotsDirPaths, err := dirs.GetScreenshotsDirs()
-	if err != nil {
-		return WrapError(err)
-	}
-	screenshotsDirs := []dirs.ScreenshotDir{}
-	for _, path := range screenshotsDirPaths {
-		screenshotsDirs = append(screenshotsDirs, dirs.NewScreenshotDirFromPath(path))
+		return SteamLibraryMetaError(err)
 	}
 	out := SteamLibraryMeta{
-		SteamDir:        p,
-		GameDirs:        gd,
-		UserDir:         userDir,
-		SyncDir:         syncDir,
-		ScreenshotsDirs: screenshotsDirs,
+		SteamDir: p,
+		GameDirs: gd,
+		UserDir:  userDir,
+		SyncDir:  syncDir,
 	}
 
 	return out
+}
+
+type ScreenshotsDirs struct {
+	Error           string                `json:"error,omitempty"`
+	ScreenshotsDirs []dirs.ScreenshotsDir `json:"screenshotsDirs"`
+}
+
+func ScreenshotsDirsError(err error) ScreenshotsDirs {
+	return ScreenshotsDirs{Error: err.Error()}
+}
+
+func (a *App) GetScreenshots() ScreenshotsDirs {
+	screenshotsDirPaths, err := dirs.GetScreenshotsDirs()
+	if err != nil {
+		return ScreenshotsDirsError(err)
+	}
+	screenshotsDirs := []dirs.ScreenshotsDir{}
+	for _, path := range screenshotsDirPaths {
+		screenshotsDirs = append(screenshotsDirs, dirs.NewScreenshotsDirFromPath(path))
+	}
+	return ScreenshotsDirs{ScreenshotsDirs: screenshotsDirs}
 }
 
 func (a *App) OnWindowResize() {
