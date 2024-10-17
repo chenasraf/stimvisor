@@ -5,11 +5,12 @@ import { useState } from 'react'
 function App() {
   const [queryClient] = useState(() => new QueryClient())
   return (
-    <div id="App" className="bg-bg min-h-screen text-gray-400">
-      <QueryClientProvider client={queryClient}>
-        <Sidebar />
-      </QueryClientProvider>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <div id="App" className="min-h-screen flex">
+        <Sidebar className="w-64" />
+        <div />
+      </div>
+    </QueryClientProvider>
   )
 }
 

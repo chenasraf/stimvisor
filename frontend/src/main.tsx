@@ -1,7 +1,9 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import './style.css'
 import '@fontsource-variable/nunito'
+// import './fonts.css'
+import './reset.css'
+import './style.css'
 import App from './App'
 
 const container = document.getElementById('root')

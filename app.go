@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"encoding/json"
+	"fmt"
+	"path/filepath"
 )
 
 // App struct
@@ -21,22 +22,49 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-func JsonResponse(data interface{}, err error) string {
-	if err != nil {
-		res, _ := json.Marshal(map[string]interface{}{"error": err.Error()})
-		return string(res)
-	}
-	res, _ := json.Marshal(data)
-	return string(res)
+func WrapError(err error) SteamLibraryMeta {
+	return SteamLibraryMeta{Error: err.Error()}
 }
 
-func (a *App) GetScreenshotsDirs() string {
+type SteamLibraryMeta struct {
+	Error           string   `json:"error,omitempty"`
+	SteamDir        string   `json:"steamDir"`
+	UserDir         string   `json:"userDir"`
+	GameDirs        []string `json:"gameDirs"`
+	ScreenshotsDirs []string `json:"screenshotsDirs"`
+	SyncDir         string   `json:"syncDir"`
+}
+
+func (a *App) GetSteamLibraryMeta() SteamLibraryMeta {
 	p, err := GetSteamDirectory()
 	if err != nil {
-		return JsonResponse(nil, err)
+		return WrapError(err)
 	}
-	out := make(map[string]interface{})
-	out["steamDir"] = p
+	userDir, err := GetSteamUserDirectory()
+	if err != nil {
+		return WrapError(err)
+	}
+	fmt.Printf("User Dir: %s\n", userDir)
+	userId := filepath.Base(userDir)
+	gd, err := GetGameDirectories(userId)
+	if err != nil {
+		return WrapError(err)
+	}
+	syncDir, err := GetSyncDirectory()
+	if err != nil {
+		return WrapError(err)
+	}
+	screenshotsDirs, err := GetScreenshotsDirs()
+	if err != nil {
+		return WrapError(err)
+	}
+	out := SteamLibraryMeta{
+		SteamDir:        p,
+		GameDirs:        gd,
+		UserDir:         userDir,
+		SyncDir:         syncDir,
+		ScreenshotsDirs: screenshotsDirs,
+	}
 
-	return JsonResponse(out, nil)
+	return out
 }

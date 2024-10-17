@@ -25,6 +25,22 @@ export default {
         ...colors,
       },
     },
+    fontFamily: {
+      nunito: [
+        'Nunito Variable',
+        '-apple-system',
+        'BlinkMacSystemFont',
+        'Helvetica Neue',
+        'Segoe UI',
+        'Roboto',
+        'Oxygen',
+        'Ubuntu',
+        'Cantarell',
+        'Fira Sans',
+        'Droid Sans',
+        'sans-serif',
+      ],
+    },
   },
   plugins: [],
 }

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"slices"
+	"strconv"
 )
 
 const (
@@ -42,24 +44,30 @@ func GetSteamDirectory() (string, error) {
 	return fmt.Sprintf(format, homedir), nil
 }
 
-func GetSteamUserdataDirectory() (string, error) {
-	steamDir, err := GetSteamDirectory()
+func GetSteamUserDirectory() (string, error) {
+	userDirs, err := GetUsersDirectories()
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s/userdata", steamDir), nil
+	if len(userDirs) == 0 {
+		return "", fmt.Errorf("Could not find any Steam users")
+	}
+	// TODO multiple users
+	return userDirs[0], nil
 }
 
 func GetSyncDirectory() (string, error) {
-	dataDir, err := GetSteamUserdataDirectory()
+	userDir, err := GetSteamUserDirectory()
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s/760", dataDir), nil
+	return fmt.Sprintf("%s/760", userDir), nil
 }
 
+var STEAM_INTERNAL_IDS = []string{"7", "760"}
+
 // screenshots: /Users/chen/Library/Application\ Support/Steam/userdata/37889173/760/remote/1086940/screenshots
-func GetGameDirectories() ([]string, error) {
+func GetUsersDirectories() ([]string, error) {
 	steamDir, err := GetSteamDirectory()
 	if err != nil {
 		return nil, err
@@ -69,13 +77,76 @@ func GetGameDirectories() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	var gameDirs []string
+	var userDirs []string
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			continue
 		}
 		gameDir := fmt.Sprintf("%s/%s", steamUserData, entry.Name())
+		userDirs = append(userDirs, gameDir)
+	}
+	return userDirs, nil
+}
+
+func GetUserDirectory(userId string) (string, error) {
+	steamDir, err := GetSteamDirectory()
+	if err != nil {
+		return "", err
+	}
+	fmt.Printf("Get User Dir: %s/userdata/%s\n", steamDir, userId)
+	return fmt.Sprintf("%s/userdata/%s", steamDir, userId), nil
+}
+
+func GetGameDirectories(userId string) ([]string, error) {
+	userDir, err := GetUserDirectory(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	entries, err := os.ReadDir(userDir)
+	if err != nil {
+		return nil, err
+	}
+
+	gameDirs := []string{}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		if slices.Contains(STEAM_INTERNAL_IDS, entry.Name()) {
+			continue
+		}
+		if _, err := strconv.Atoi(entry.Name()); err != nil {
+			continue
+		}
+		gameDir := fmt.Sprintf("%s/%s", userDir, entry.Name())
 		gameDirs = append(gameDirs, gameDir)
 	}
 	return gameDirs, nil
+}
+
+func GetScreenshotsDirs() ([]string, error) {
+	syncDir, err := GetSyncDirectory()
+	if err != nil {
+		return nil, err
+	}
+	var dirs []string
+	remoteDir := fmt.Sprintf("%s/remote", syncDir)
+	entries, err := os.ReadDir(remoteDir)
+	if err != nil {
+		return nil, err
+	}
+	for _, entry := range entries {
+		fmt.Printf("Entry: %s\n", entry.Name())
+		if !entry.IsDir() {
+			continue
+		}
+		scrDir := fmt.Sprintf("%s/%s/screenshots", remoteDir, entry.Name())
+		fmt.Printf("Checking: %s\n", scrDir)
+		if _, err := os.Stat(scrDir); os.IsNotExist(err) {
+			continue
+		}
+		dirs = append(dirs, scrDir)
+	}
+	return dirs, nil
 }
