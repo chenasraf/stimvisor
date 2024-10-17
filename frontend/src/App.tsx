@@ -18,8 +18,8 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <AppContextProvider>
           <div id="App" className="min-h-screen flex">
-            <Sidebar className="w-64" />
-            <div>
+            <Sidebar className="min-w-64 w-64" />
+            <div className="max-h-screen overflow-y-auto">
               <Routes>
                 <Route path="/" element={<div />} />
                 <Route path="/screenshots/*" element={<ScreenshotsPage />} />
@@ -33,10 +33,11 @@ function App() {
 }
 
 function AppContextProvider({ children }: React.PropsWithChildren<object>) {
-  const { data: meta } = useApi(() => GetSteamLibraryMeta(), {
+  const { data: meta, isFetching } = useApi(() => GetSteamLibraryMeta(), {
     initialData: {} as never,
     debug: true,
   })
+  if (!meta || isFetching) return <div>Loading...</div>
   return <AppContext.Provider value={{ meta }}>{children}</AppContext.Provider>
 }
 

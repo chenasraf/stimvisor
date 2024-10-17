@@ -1,4 +1,4 @@
-module stimvisor
+module github.com/chenasraf/stimvisor
 
 go 1.21
 

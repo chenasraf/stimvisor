@@ -1,4 +1,4 @@
-package main
+package dirs
 
 import (
 	"fmt"
@@ -66,7 +66,6 @@ func GetSyncDirectory() (string, error) {
 
 var STEAM_INTERNAL_IDS = []string{"7", "760"}
 
-// screenshots: /Users/chen/Library/Application\ Support/Steam/userdata/37889173/760/remote/1086940/screenshots
 func GetUsersDirectories() ([]string, error) {
 	steamDir, err := GetSteamDirectory()
 	if err != nil {
@@ -93,7 +92,7 @@ func GetUserDirectory(userId string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("Get User Dir: %s/userdata/%s\n", steamDir, userId)
+	// fmt.Printf("Get User Dir: %s/userdata/%s\n", steamDir, userId)
 	return fmt.Sprintf("%s/userdata/%s", steamDir, userId), nil
 }
 
@@ -137,12 +136,12 @@ func GetScreenshotsDirs() ([]string, error) {
 		return nil, err
 	}
 	for _, entry := range entries {
-		fmt.Printf("Entry: %s\n", entry.Name())
+		// fmt.Printf("Entry: %s\n", entry.Name())
 		if !entry.IsDir() {
 			continue
 		}
 		scrDir := fmt.Sprintf("%s/%s/screenshots", remoteDir, entry.Name())
-		fmt.Printf("Checking: %s\n", scrDir)
+		// fmt.Printf("Checking: %s\n", scrDir)
 		if _, err := os.Stat(scrDir); os.IsNotExist(err) {
 			continue
 		}
