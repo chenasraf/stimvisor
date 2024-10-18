@@ -21,29 +21,24 @@ export function ScreenshotsPage() {
   console.debug('ScreenshotsPage', meta)
   return (
     <div className={cn('p-4')}>
-      <h1 className="text-2xl">Screenshots</h1>
+      <h1 className="text-2xl mb-4">Screenshots</h1>
 
       <div>
         <LoadingContainer loading={isFetching}>
-          {screenshots.screenshotsDirs?.map((dir) => (
-            <div key={dir.dir}>
-              <h2>{dir.gameId}</h2>
-              <div className="flex items-start gap-4 flex-wrap max-w-full">
-                {dir.screenshots.map((file) => (
-                  <img className="max-w-64 rounded-md" key={file} src={file} alt={file} />
-                ))}
+          <div className="flex flex-col gap-8">
+            {screenshots.screenshotsDirs?.map((dir) => (
+              <div key={dir.dir}>
+                <h2 className="text-xl mb-2">{dir.gameName}</h2>
+                <div className="flex items-start gap-4 flex-wrap max-w-full">
+                  {dir.screenshots.map((file) => (
+                    <img className="max-w-64 rounded-md" key={file} src={file} alt={file} />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </LoadingContainer>
       </div>
-
-      <details>
-        <summary>Meta</summary>
-        <code>
-          <pre>{JSON.stringify(meta, null, 2)}</pre>
-        </code>
-      </details>
     </div>
   )
 }

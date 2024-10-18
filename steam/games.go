@@ -13,10 +13,9 @@ import (
 )
 
 type GameInfo struct {
-	Id             string              `json:"id"`
-	Name           string              `json:"name"`
-	InstallDir     string              `json:"installDir"`
-	ScreenshotsDir dirs.ScreenshotsDir `json:"screenshotsDir"`
+	Id         string `json:"id"`
+	Name       string `json:"name"`
+	InstallDir string `json:"installDir"`
 }
 
 func GetGameInfo(gameId string) GameInfo {
@@ -25,16 +24,10 @@ func GetGameInfo(gameId string) GameInfo {
 		return GameInfo{}
 	}
 	gameName := GetGameName(gameId)
-	screenshotsDirPath, err := dirs.GetScreenshotsDir(gameId)
-	if err != nil {
-		return GameInfo{}
-	}
-	screenshotsDir := dirs.NewScreenshotsDirFromPath(screenshotsDirPath)
 	return GameInfo{
-		Id:             gameId,
-		Name:           gameName,
-		InstallDir:     gameDir,
-		ScreenshotsDir: screenshotsDir,
+		Id:         gameId,
+		Name:       gameName,
+		InstallDir: gameDir,
 	}
 }
 

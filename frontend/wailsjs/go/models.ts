@@ -1,26 +1,3 @@
-export namespace dirs {
-	
-	export class ScreenshotsDir {
-	    dir: string;
-	    userId: string;
-	    gameId: string;
-	    screenshots: string[];
-	
-	    static createFrom(source: any = {}) {
-	        return new ScreenshotsDir(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.dir = source["dir"];
-	        this.userId = source["userId"];
-	        this.gameId = source["gameId"];
-	        this.screenshots = source["screenshots"];
-	    }
-	}
-
-}
-
 export namespace main {
 	
 	export class Games {
@@ -57,7 +34,7 @@ export namespace main {
 	}
 	export class ScreenshotsDirs {
 	    error?: string;
-	    screenshotsDirs: dirs.ScreenshotsDir[];
+	    screenshotsDirs: screenshots.ScreenshotsDir[];
 	
 	    static createFrom(source: any = {}) {
 	        return new ScreenshotsDirs(source);
@@ -66,7 +43,7 @@ export namespace main {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.error = source["error"];
-	        this.screenshotsDirs = this.convertValues(source["screenshotsDirs"], dirs.ScreenshotsDir);
+	        this.screenshotsDirs = this.convertValues(source["screenshotsDirs"], screenshots.ScreenshotsDir);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -110,13 +87,37 @@ export namespace main {
 
 }
 
+export namespace screenshots {
+	
+	export class ScreenshotsDir {
+	    dir: string;
+	    userId: string;
+	    gameId: string;
+	    gameName: string;
+	    screenshots: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ScreenshotsDir(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.dir = source["dir"];
+	        this.userId = source["userId"];
+	        this.gameId = source["gameId"];
+	        this.gameName = source["gameName"];
+	        this.screenshots = source["screenshots"];
+	    }
+	}
+
+}
+
 export namespace steam {
 	
 	export class GameInfo {
 	    id: string;
 	    name: string;
 	    installDir: string;
-	    screenshotsDir: dirs.ScreenshotsDir;
 	
 	    static createFrom(source: any = {}) {
 	        return new GameInfo(source);
@@ -127,26 +128,7 @@ export namespace steam {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.installDir = source["installDir"];
-	        this.screenshotsDir = this.convertValues(source["screenshotsDir"], dirs.ScreenshotsDir);
 	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
 	}
 
 }

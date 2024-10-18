@@ -7,6 +7,7 @@ import (
 
 	"github.com/chenasraf/stimvisor/config"
 	"github.com/chenasraf/stimvisor/dirs"
+	"github.com/chenasraf/stimvisor/screenshots"
 	"github.com/chenasraf/stimvisor/steam"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -69,8 +70,8 @@ func (a *App) GetSteamLibraryMeta() SteamLibraryMeta {
 }
 
 type ScreenshotsDirs struct {
-	Error           string                `json:"error,omitempty"`
-	ScreenshotsDirs []dirs.ScreenshotsDir `json:"screenshotsDirs"`
+	Error           string                       `json:"error,omitempty"`
+	ScreenshotsDirs []screenshots.ScreenshotsDir `json:"screenshotsDirs"`
 }
 
 func ScreenshotsDirsError(err error) ScreenshotsDirs {
@@ -82,9 +83,9 @@ func (a *App) GetScreenshots() ScreenshotsDirs {
 	if err != nil {
 		return ScreenshotsDirsError(err)
 	}
-	screenshotsDirs := []dirs.ScreenshotsDir{}
+	screenshotsDirs := []screenshots.ScreenshotsDir{}
 	for _, path := range screenshotsDirPaths {
-		screenshotsDirs = append(screenshotsDirs, dirs.NewScreenshotsDirFromPath(path))
+		screenshotsDirs = append(screenshotsDirs, screenshots.NewScreenshotsDirFromPath(path))
 	}
 	return ScreenshotsDirs{ScreenshotsDirs: screenshotsDirs}
 }

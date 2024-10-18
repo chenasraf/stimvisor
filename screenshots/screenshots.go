@@ -1,4 +1,4 @@
-package dirs
+package screenshots
 
 import (
 	"encoding/base64"
@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/chenasraf/stimvisor/steam"
 )
 
 // screenshots: /Users/chen/Library/Application\ Support/Steam/userdata/USER_ID/760/remote/GAME_ID/screenshots
@@ -13,6 +15,7 @@ type ScreenshotsDir struct {
 	Dir         string   `json:"dir"`
 	UserId      string   `json:"userId"`
 	GameId      string   `json:"gameId"`
+	GameName    string   `json:"gameName"`
 	Screenshots []string `json:"screenshots"`
 }
 
@@ -28,6 +31,7 @@ func NewScreenshotsDirFromPath(path string) ScreenshotsDir {
 	s := ScreenshotsDir{}
 	s.Dir = path
 	s.GameId = filepath.Base(GetDir(path, 1))
+	s.GameName = steam.GetGameName(s.GameId)
 	s.UserId = filepath.Base(GetDir(path, 4))
 
 	files, err := dir.Readdir(0)
