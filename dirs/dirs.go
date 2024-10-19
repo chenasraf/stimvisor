@@ -19,6 +19,7 @@ const (
 	SYNC_APP_ID = 760
 )
 
+// GetSteamDirectory returns the Steam directory path based on the operating system.
 func GetSteamDirectory() (string, error) {
 	osname := runtime.GOOS
 	var format string
@@ -45,11 +46,13 @@ func GetSteamDirectory() (string, error) {
 	return fmt.Sprintf(format, homedir), nil
 }
 
+// GetUserId returns the Steam user ID by extracting it from the Steam user directory path.
 func GetUserId() (string, error) {
 	userDir, err := GetSteamUserDirectory()
 	return filepath.Base(userDir), err
 }
 
+// GetSteamUserDirectory returns the directory path of the first Steam user found.
 func GetSteamUserDirectory() (string, error) {
 	userDirs, err := GetUsersDirectories()
 	if err != nil {
@@ -62,6 +65,7 @@ func GetSteamUserDirectory() (string, error) {
 	return userDirs[0], nil
 }
 
+// GetSyncDirectory returns the directory path for Steam sync data.
 func GetSyncDirectory() (string, error) {
 	userDir, err := GetSteamUserDirectory()
 	if err != nil {
@@ -72,6 +76,7 @@ func GetSyncDirectory() (string, error) {
 
 var STEAM_INTERNAL_IDS = []string{"7", "760"}
 
+// GetUsersDirectories returns a list of directories for all Steam users.
 func GetUsersDirectories() ([]string, error) {
 	steamDir, err := GetSteamDirectory()
 	if err != nil {
@@ -93,6 +98,7 @@ func GetUsersDirectories() ([]string, error) {
 	return userDirs, nil
 }
 
+// GetUserDirectory returns the directory path for a specific Steam user by user ID.
 func GetUserDirectory(userId string) (string, error) {
 	steamDir, err := GetSteamDirectory()
 	if err != nil {
@@ -102,6 +108,7 @@ func GetUserDirectory(userId string) (string, error) {
 	return fmt.Sprintf("%s/userdata/%s", steamDir, userId), nil
 }
 
+// GetGameDirectories returns a list of directories for all games of a specific Steam user by user ID.
 func GetGameDirectories(userId string) ([]string, error) {
 	userDir, err := GetUserDirectory(userId)
 	if err != nil {
@@ -130,6 +137,7 @@ func GetGameDirectories(userId string) ([]string, error) {
 	return gameDirs, nil
 }
 
+// GetGameDirectory returns the directory path for a specific game by game ID.
 func GetGameDirectory(gameId string) (string, error) {
 	userDir, err := GetSteamUserDirectory()
 	if err != nil {
@@ -139,6 +147,7 @@ func GetGameDirectory(gameId string) (string, error) {
 	return fmt.Sprintf("%s/%s", userDir, gameId), nil
 }
 
+// GetScreenshotsDirs returns a list of directories for all screenshots of all games.
 func GetScreenshotsDirs() ([]string, error) {
 	syncDir, err := GetSyncDirectory()
 	if err != nil {
@@ -165,6 +174,7 @@ func GetScreenshotsDirs() ([]string, error) {
 	return dirs, nil
 }
 
+// GetScreenshotsDir returns the directory path for screenshots of a specific game by game ID.
 func GetScreenshotsDir(gameId string) (string, error) {
 	syncDir, err := GetSyncDirectory()
 	if err != nil {

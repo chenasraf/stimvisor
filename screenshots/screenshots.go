@@ -17,9 +17,10 @@ type ScreenshotsDir struct {
 	GameId      string   `json:"gameId"`
 	GameName    string   `json:"gameName"`
 	Screenshots []string `json:"screenshots"`
+	TotalCount  int      `json:"totalCount"`
 }
 
-func NewScreenshotsDirFromPath(path string) ScreenshotsDir {
+func NewScreenshotsDirFromPath(path string, limit int) ScreenshotsDir {
 	dir, err := os.Open(path)
 	if os.IsNotExist(err) {
 		return ScreenshotsDir{}
@@ -30,17 +31,21 @@ func NewScreenshotsDirFromPath(path string) ScreenshotsDir {
 	defer dir.Close()
 	s := ScreenshotsDir{}
 	s.Dir = path
-	s.GameId = filepath.Base(GetDir(path, 1))
+	s.GameId = filepath.Base(getDir(path, 1))
 	s.GameName = steam.GetGameName(s.GameId)
-	s.UserId = filepath.Base(GetDir(path, 4))
+	s.UserId = filepath.Base(getDir(path, 4))
 
 	files, err := dir.Readdir(0)
 	if err != nil {
 		return s
 	}
-	for _, f := range files {
+	s.TotalCount = len(files)
+	for i, f := range files {
 		if f.IsDir() {
 			continue
+		}
+		if limit > 0 && i >= limit {
+			break
 		}
 		path := fmt.Sprintf("%s/%s", path, f.Name())
 		// s.Screenshots = append(s.Screenshots, fmt.Sprintf("%s/%s", path, f.Name()))
@@ -70,7 +75,7 @@ func NewScreenshotsDirFromPath(path string) ScreenshotsDir {
 	return s
 }
 
-func GetDir(path string, depth int) string {
+func getDir(path string, depth int) string {
 	for i := 0; i < depth; i++ {
 		path = filepath.Dir(path)
 	}

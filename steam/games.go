@@ -12,30 +12,34 @@ import (
 	"github.com/chenasraf/stimvisor/dirs"
 )
 
+// GameInfo represents the information about a game.
 type GameInfo struct {
 	Id         string `json:"id"`
 	Name       string `json:"name"`
 	InstallDir string `json:"installDir"`
 }
 
-func GetGameInfo(gameId string) GameInfo {
+// GetGameInfo retrieves the information of a game given its ID.
+func GetGameInfo(gameId string) (GameInfo, error) {
 	gameDir, err := dirs.GetGameDirectory(gameId)
 	if err != nil {
-		return GameInfo{}
+		return GameInfo{}, err
 	}
 	gameName := GetGameName(gameId)
 	return GameInfo{
 		Id:         gameId,
 		Name:       gameName,
 		InstallDir: gameDir,
-	}
+	}, nil
 }
 
+// GetGameInfoCacheDir returns the directory path for caching game information.
 func GetGameInfoCacheDir() string {
 	configDir := config.GetConfigDir()
 	return filepath.Join(configDir, ".cache", "gameinfo")
 }
 
+// LoadGameInfo loads the game information from the cache or fetches it if not available.
 func LoadGameInfo(gameId string) (map[string]interface{}, error) {
 	os.MkdirAll(GetGameInfoCacheDir(), 0755)
 	info := make(map[string]interface{})
@@ -60,6 +64,7 @@ func LoadGameInfo(gameId string) (map[string]interface{}, error) {
 
 const STEAM_API_URL = "https://store.steampowered.com/api/appdetails?appids=%s"
 
+// FetchGameInfo fetches the game information from the Steam API and caches it.
 func FetchGameInfo(gameId string) (map[string]interface{}, error) {
 	cachePath := filepath.Join(GetGameInfoCacheDir(), gameId+".json")
 	url := fmt.Sprintf(STEAM_API_URL, gameId)
@@ -92,22 +97,13 @@ func FetchGameInfo(gameId string) (map[string]interface{}, error) {
 	return respGameData, nil
 }
 
+// GetGameName retrieves the name of a game given its ID.
 func GetGameName(gameId string) string {
 	os.MkdirAll(GetGameInfoCacheDir(), 0755)
-	info := make(map[string]interface{})
-	cachePath := filepath.Join(GetGameInfoCacheDir(), gameId+".json")
-	if _, err := os.Stat(cachePath); os.IsNotExist(err) {
-		info, err = FetchGameInfo(gameId)
-		if err != nil {
-			return gameId
-		}
-	} else {
-		info, err = LoadGameInfo(gameId)
-		if err != nil {
-			return gameId
-		}
+	info, err := LoadGameInfo(gameId)
+	if err != nil {
+		return gameId
 	}
-	fmt.Printf("INFO: %v\n", info)
 	if info["name"] == nil {
 		return gameId
 	}

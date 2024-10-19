@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"path/filepath"
 
 	"github.com/chenasraf/stimvisor/config"
@@ -78,6 +77,8 @@ func ScreenshotsDirsError(err error) ScreenshotsDirs {
 	return ScreenshotsDirs{Error: err.Error()}
 }
 
+const SHORT_SCREENSHOTS_LIMIT = 5
+
 func (a *App) GetScreenshots() ScreenshotsDirs {
 	screenshotsDirPaths, err := dirs.GetScreenshotsDirs()
 	if err != nil {
@@ -85,9 +86,27 @@ func (a *App) GetScreenshots() ScreenshotsDirs {
 	}
 	screenshotsDirs := []screenshots.ScreenshotsDir{}
 	for _, path := range screenshotsDirPaths {
-		screenshotsDirs = append(screenshotsDirs, screenshots.NewScreenshotsDirFromPath(path))
+		screenshotsDirs = append(screenshotsDirs, screenshots.NewScreenshotsDirFromPath(path, SHORT_SCREENSHOTS_LIMIT))
 	}
 	return ScreenshotsDirs{ScreenshotsDirs: screenshotsDirs}
+}
+
+type ScreenshotsDir struct {
+	Error          string                     `json:"error,omitempty"`
+	ScreenshotsDir screenshots.ScreenshotsDir `json:"screenshotsDir"`
+}
+
+func ScreenshotsDirError(err error) ScreenshotsDir {
+	return ScreenshotsDir{Error: err.Error()}
+}
+
+func (a *App) GetScreenshotsForGame(gameId string) ScreenshotsDir {
+	screenshotsDirPath, err := dirs.GetScreenshotsDir(gameId)
+	if err != nil {
+		return ScreenshotsDirError(err)
+	}
+	screenshotsDir := screenshots.NewScreenshotsDirFromPath(screenshotsDirPath, 0)
+	return ScreenshotsDir{ScreenshotsDir: screenshotsDir}
 }
 
 type Games struct {
@@ -111,7 +130,10 @@ func (a *App) GetGames() Games {
 	games := []steam.GameInfo{}
 	for _, path := range gameDirPaths {
 		gameId := filepath.Base(path)
-		gameInfo := steam.GetGameInfo(gameId)
+		gameInfo, err := steam.GetGameInfo(gameId)
+		if err != nil {
+			continue
+		}
 		games = append(games, gameInfo)
 	}
 	return Games{Games: games}
@@ -121,7 +143,7 @@ func (a *App) OnWindowResize() {
 	config := config.GetConfig()
 
 	w, h := runtime.WindowGetSize(a.ctx)
-	fmt.Printf("OnWindowResize: %d, %d\n", w, h)
+	// fmt.Printf("OnWindowResize: %d, %d\n", w, h)
 	config.WindowWidth = w
 	config.WindowHeight = h
 

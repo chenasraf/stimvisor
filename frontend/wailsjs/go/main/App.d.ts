@@ -6,6 +6,8 @@ export function GetGames():Promise<main.Games>;
 
 export function GetScreenshots():Promise<main.ScreenshotsDirs>;
 
+export function GetScreenshotsForGame(arg1:string):Promise<main.ScreenshotsDir>;
+
 export function GetSteamLibraryMeta():Promise<main.SteamLibraryMeta>;
 
 export function OnWindowResize():Promise<void>;

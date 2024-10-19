@@ -10,6 +10,10 @@ export function GetScreenshots() {
   return window['go']['main']['App']['GetScreenshots']();
 }
 
+export function GetScreenshotsForGame(arg1) {
+  return window['go']['main']['App']['GetScreenshotsForGame'](arg1);
+}
+
 export function GetSteamLibraryMeta() {
   return window['go']['main']['App']['GetSteamLibraryMeta']();
 }
