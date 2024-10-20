@@ -8,7 +8,7 @@ export function Sidebar({ className, ...rest }: HtmlProps<'div'>) {
   return (
     <div className={cn('py-3 bg-bg-950 h-screen overflow-y-auto', className)} {...rest}>
       <ul>
-        <ListItem label="Games" to="/games" />
+        <ListItem label="Games" to="/games" match={(p) => p === '/' || p.startsWith('/games')} />
         <ListItem
           label="Screenshots"
           to="/screenshots"

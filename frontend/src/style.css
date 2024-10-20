@@ -87,4 +87,14 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+
+  *::-webkit-scrollbar {
+    @apply w-[18px];
+    @apply bg-background;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-xl;
+    box-shadow: hsl(var(--background)) inset 0 0 0 4px;
+  }
 }

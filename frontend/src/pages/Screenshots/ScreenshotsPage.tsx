@@ -46,15 +46,15 @@ export function ScreenshotsPage() {
 function ScreenshotsHome() {
   const { screenshots, isFetching } = useScreenshotsDirs()
   return (
-    <div className={cn('p-4')}>
-      <h1 className="text-2xl mb-4">Screenshots</h1>
+    <div className="relative">
+      <h1 className="sticky top-0 p-4 bg-background text-2xl z-10">Screenshots</h1>
 
       <div>
         <LoadingContainer loading={isFetching}>
           <div className="flex flex-col gap-8">
             {screenshots.screenshotCollections?.map((dir) => (
-              <div key={dir.dir} className="flex flex-col gap-4">
-                <div className="flex items-center gap-2 justify-between">
+              <div key={dir.dir} className="flex flex-col gap-4 p-4">
+                <div className="sticky top-[32px] bg-background flex items-center gap-2 justify-between z-0">
                   <h2 className="text-xl">{dir.gameName}</h2>
                   <div className="flex items-center gap-2">
                     <Button variant="outline" asChild>
@@ -65,7 +65,7 @@ function ScreenshotsHome() {
                     </Button>
                   </div>
                 </div>
-                <div className="flex items-start gap-4 flex-wrap max-w-full">
+                <div className="flex items-start gap-4 flex-nowrap overflow-x-hidden max-w-full">
                   {dir.screenshots.map((file) => (
                     <img
                       className="max-w-64 rounded-md"
@@ -88,8 +88,8 @@ function ScreenshotsGamePage() {
   const { screenshots, isFetching } = useScreenshotsDir(gameId!)
   const [dir] = screenshots.screenshotCollections ?? [{ screenshots: [] }]
   return (
-    <div className={cn('p-4')}>
-      <div className="flex flex-col gap-2">
+    <div className="relative">
+      <div className="sticky top-0 p-4 bg-background flex flex-col gap-2 z-10">
         <div>
           <Button variant="outline" size="sm" asChild>
             <Link to="/screenshots">
@@ -98,10 +98,17 @@ function ScreenshotsGamePage() {
             </Link>
           </Button>
         </div>
-        <h1 className="text-2xl mb-4">Screenshots for {dir.gameName}</h1>
+        <div className="flex items-center gap-2 justify-between">
+          <h1 className="text-2xl p-4 bg-background">Screenshots for {dir.gameName}</h1>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => NativeOpen(dir.dir)}>
+              Browse Folder
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <div>
+      <div className="p-4 pt-0">
         <LoadingContainer loading={isFetching}>
           <div className="flex flex-col gap-8">
             <div className="flex items-start gap-4 flex-wrap max-w-full">

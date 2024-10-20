@@ -8,5 +8,12 @@ export function LoadingContainer({
   children,
   ...rest
 }: HtmlProps<'div'> & { loading: boolean }) {
-  return loading ? <Loader className={cn('', className)} {...rest} /> : children
+  return loading ? (
+    <Loader
+      className={cn('w-full h-full flex items-center justify-center min-h-[50vh]', className)}
+      {...rest}
+    />
+  ) : (
+    children
+  )
 }
