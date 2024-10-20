@@ -6,6 +6,7 @@ import (
 
 	"github.com/chenasraf/stimvisor/config"
 	"github.com/chenasraf/stimvisor/dirs"
+	"github.com/chenasraf/stimvisor/native"
 	"github.com/chenasraf/stimvisor/screenshots"
 	"github.com/chenasraf/stimvisor/steam"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -27,11 +28,11 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-func SteamLibraryMetaError(err error) SteamLibraryMeta {
-	return SteamLibraryMeta{Error: err.Error()}
+func LibraryMetaInfo(err error) LibraryInfo {
+	return LibraryInfo{Error: err.Error()}
 }
 
-type SteamLibraryMeta struct {
+type LibraryInfo struct {
 	Error    string   `json:"error,omitempty"`
 	SteamDir string   `json:"steamDir"`
 	UserDir  string   `json:"userDir"`
@@ -39,26 +40,26 @@ type SteamLibraryMeta struct {
 	SyncDir  string   `json:"syncDir"`
 }
 
-func (a *App) GetSteamLibraryMeta() SteamLibraryMeta {
+func (a *App) GetLibraryInfo() LibraryInfo {
 	p, err := dirs.GetSteamDirectory()
 	if err != nil {
-		return SteamLibraryMetaError(err)
+		return LibraryMetaInfo(err)
 	}
 	userDir, err := dirs.GetSteamUserDirectory()
 	if err != nil {
-		return SteamLibraryMetaError(err)
+		return LibraryMetaInfo(err)
 	}
 	// fmt.Printf("User Dir: %s\n", userDir)
 	userId := filepath.Base(userDir)
 	gd, err := dirs.GetGameDirectories(userId)
 	if err != nil {
-		return SteamLibraryMetaError(err)
+		return LibraryMetaInfo(err)
 	}
 	syncDir, err := dirs.GetSyncDirectory()
 	if err != nil {
-		return SteamLibraryMetaError(err)
+		return LibraryMetaInfo(err)
 	}
-	out := SteamLibraryMeta{
+	out := LibraryInfo{
 		SteamDir: p,
 		GameDirs: gd,
 		UserDir:  userDir,
@@ -68,57 +69,48 @@ func (a *App) GetSteamLibraryMeta() SteamLibraryMeta {
 	return out
 }
 
-type ScreenshotsDirs struct {
-	Error           string                       `json:"error,omitempty"`
-	ScreenshotsDirs []screenshots.ScreenshotsDir `json:"screenshotsDirs"`
+type ScreenshotCollectionResponse struct {
+	Error                 string                             `json:"error,omitempty"`
+	ScreenshotCollections []screenshots.ScreenshotCollection `json:"screenshotCollections"`
 }
 
-func ScreenshotsDirsError(err error) ScreenshotsDirs {
-	return ScreenshotsDirs{Error: err.Error()}
+func ScreenshotCollectionError(err error) ScreenshotCollectionResponse {
+	return ScreenshotCollectionResponse{Error: err.Error()}
 }
 
 const SHORT_SCREENSHOTS_LIMIT = 5
 
-func (a *App) GetScreenshots() ScreenshotsDirs {
+func (a *App) GetScreenshots() ScreenshotCollectionResponse {
 	screenshotsDirPaths, err := dirs.GetScreenshotsDirs()
 	if err != nil {
-		return ScreenshotsDirsError(err)
+		return ScreenshotCollectionError(err)
 	}
-	screenshotsDirs := []screenshots.ScreenshotsDir{}
+	screenshotsDirs := []screenshots.ScreenshotCollection{}
 	for _, path := range screenshotsDirPaths {
 		screenshotsDirs = append(screenshotsDirs, screenshots.NewScreenshotsDirFromPath(path, SHORT_SCREENSHOTS_LIMIT))
 	}
-	return ScreenshotsDirs{ScreenshotsDirs: screenshotsDirs}
+	return ScreenshotCollectionResponse{ScreenshotCollections: screenshotsDirs}
 }
 
-type ScreenshotsDir struct {
-	Error          string                     `json:"error,omitempty"`
-	ScreenshotsDir screenshots.ScreenshotsDir `json:"screenshotsDir"`
-}
-
-func ScreenshotsDirError(err error) ScreenshotsDir {
-	return ScreenshotsDir{Error: err.Error()}
-}
-
-func (a *App) GetScreenshotsForGame(gameId string) ScreenshotsDir {
+func (a *App) GetScreenshotsForGame(gameId string) ScreenshotCollectionResponse {
 	screenshotsDirPath, err := dirs.GetScreenshotsDir(gameId)
 	if err != nil {
-		return ScreenshotsDirError(err)
+		return ScreenshotCollectionError(err)
 	}
 	screenshotsDir := screenshots.NewScreenshotsDirFromPath(screenshotsDirPath, 0)
-	return ScreenshotsDir{ScreenshotsDir: screenshotsDir}
+	return ScreenshotCollectionResponse{ScreenshotCollections: []screenshots.ScreenshotCollection{screenshotsDir}}
 }
 
-type Games struct {
+type GamesResponse struct {
 	Error string           `json:"error,omitempty"`
 	Games []steam.GameInfo `json:"games"`
 }
 
-func GamesError(err error) Games {
-	return Games{Error: err.Error()}
+func GamesError(err error) GamesResponse {
+	return GamesResponse{Error: err.Error()}
 }
 
-func (a *App) GetGames() Games {
+func (a *App) GetGames() GamesResponse {
 	userId, err := dirs.GetUserId()
 	if err != nil {
 		return GamesError(err)
@@ -136,7 +128,7 @@ func (a *App) GetGames() Games {
 		}
 		games = append(games, gameInfo)
 	}
-	return Games{Games: games}
+	return GamesResponse{Games: games}
 }
 
 func (a *App) OnWindowResize() {
@@ -148,4 +140,8 @@ func (a *App) OnWindowResize() {
 	config.WindowHeight = h
 
 	config.Save()
+}
+
+func (a *App) NativeOpen(path string) error {
+	return native.NativeOpen(path)
 }

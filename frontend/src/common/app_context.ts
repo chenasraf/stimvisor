@@ -4,7 +4,7 @@ import { main } from '../../wailsjs/go/models'
 export const AppContext = createContext<AppContext>({ meta: {} as never })
 
 export type AppContext = {
-  meta: main.SteamLibraryMeta
+  meta: main.LibraryInfo
 }
 
 export function useAppContext() {

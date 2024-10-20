@@ -6,6 +6,10 @@ export function GetGames() {
   return window['go']['main']['App']['GetGames']();
 }
 
+export function GetLibraryInfo() {
+  return window['go']['main']['App']['GetLibraryInfo']();
+}
+
 export function GetScreenshots() {
   return window['go']['main']['App']['GetScreenshots']();
 }
@@ -14,8 +18,8 @@ export function GetScreenshotsForGame(arg1) {
   return window['go']['main']['App']['GetScreenshotsForGame'](arg1);
 }
 
-export function GetSteamLibraryMeta() {
-  return window['go']['main']['App']['GetSteamLibraryMeta']();
+export function NativeOpen(arg1) {
+  return window['go']['main']['App']['NativeOpen'](arg1);
 }
 
 export function OnWindowResize() {

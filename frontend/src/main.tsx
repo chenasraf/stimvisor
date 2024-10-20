@@ -2,7 +2,7 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import '@fontsource-variable/nunito'
 // import './fonts.css'
-import './reset.css'
+// import './reset.css'
 import './style.css'
 import App from './App'
 

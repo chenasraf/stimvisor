@@ -11,25 +11,33 @@ import (
 )
 
 // screenshots: /Users/chen/Library/Application\ Support/Steam/userdata/USER_ID/760/remote/GAME_ID/screenshots
-type ScreenshotsDir struct {
-	Dir         string   `json:"dir"`
-	UserId      string   `json:"userId"`
-	GameId      string   `json:"gameId"`
-	GameName    string   `json:"gameName"`
-	Screenshots []string `json:"screenshots"`
-	TotalCount  int      `json:"totalCount"`
+type ScreenshotCollection struct {
+	Dir         string            `json:"dir"`
+	UserId      string            `json:"userId"`
+	GameId      string            `json:"gameId"`
+	GameName    string            `json:"gameName"`
+	Screenshots []ScreenshotEntry `json:"screenshots"`
+	TotalCount  int               `json:"totalCount"`
 }
 
-func NewScreenshotsDirFromPath(path string, limit int) ScreenshotsDir {
+type ScreenshotEntry struct {
+	Dir      string `json:"dir"`
+	Path     string `json:"path"`
+	Name     string `json:"name"`
+	Base64   string `json:"base64"`
+	MimeType string `json:"mimeType"`
+}
+
+func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 	dir, err := os.Open(path)
 	if os.IsNotExist(err) {
-		return ScreenshotsDir{}
+		return ScreenshotCollection{}
 	}
 	if err != nil {
 		panic(err)
 	}
 	defer dir.Close()
-	s := ScreenshotsDir{}
+	s := ScreenshotCollection{}
 	s.Dir = path
 	s.GameId = filepath.Base(getDir(path, 1))
 	s.GameName = steam.GetGameName(s.GameId)
@@ -70,7 +78,15 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotsDir {
 			continue
 		}
 		b64 += base64.StdEncoding.EncodeToString(bytes)
-		s.Screenshots = append(s.Screenshots, b64)
+		entry := ScreenshotEntry{
+			Dir:      filepath.Dir(path),
+			Path:     path,
+			Name:     f.Name(),
+			Base64:   b64,
+			MimeType: mimeType,
+		}
+
+		s.Screenshots = append(s.Screenshots, entry)
 	}
 	return s
 }

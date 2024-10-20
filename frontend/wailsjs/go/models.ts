@@ -1,11 +1,11 @@
 export namespace main {
 	
-	export class Games {
+	export class GamesResponse {
 	    error?: string;
 	    games: steam.GameInfo[];
 	
 	    static createFrom(source: any = {}) {
-	        return new Games(source);
+	        return new GamesResponse(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -32,71 +32,7 @@ export namespace main {
 		    return a;
 		}
 	}
-	export class ScreenshotsDir {
-	    error?: string;
-	    screenshotsDir: screenshots.ScreenshotsDir;
-	
-	    static createFrom(source: any = {}) {
-	        return new ScreenshotsDir(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.error = source["error"];
-	        this.screenshotsDir = this.convertValues(source["screenshotsDir"], screenshots.ScreenshotsDir);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-	export class ScreenshotsDirs {
-	    error?: string;
-	    screenshotsDirs: screenshots.ScreenshotsDir[];
-	
-	    static createFrom(source: any = {}) {
-	        return new ScreenshotsDirs(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.error = source["error"];
-	        this.screenshotsDirs = this.convertValues(source["screenshotsDirs"], screenshots.ScreenshotsDir);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-	export class SteamLibraryMeta {
+	export class LibraryInfo {
 	    error?: string;
 	    steamDir: string;
 	    userDir: string;
@@ -104,7 +40,7 @@ export namespace main {
 	    syncDir: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new SteamLibraryMeta(source);
+	        return new LibraryInfo(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -116,21 +52,73 @@ export namespace main {
 	        this.syncDir = source["syncDir"];
 	    }
 	}
+	export class ScreenshotCollectionResponse {
+	    error?: string;
+	    screenshotCollections: screenshots.ScreenshotCollection[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ScreenshotCollectionResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.error = source["error"];
+	        this.screenshotCollections = this.convertValues(source["screenshotCollections"], screenshots.ScreenshotCollection);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 
 }
 
 export namespace screenshots {
 	
-	export class ScreenshotsDir {
+	export class ScreenshotEntry {
+	    dir: string;
+	    path: string;
+	    name: string;
+	    base64: string;
+	    mimeType: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ScreenshotEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.dir = source["dir"];
+	        this.path = source["path"];
+	        this.name = source["name"];
+	        this.base64 = source["base64"];
+	        this.mimeType = source["mimeType"];
+	    }
+	}
+	export class ScreenshotCollection {
 	    dir: string;
 	    userId: string;
 	    gameId: string;
 	    gameName: string;
-	    screenshots: string[];
+	    screenshots: ScreenshotEntry[];
 	    totalCount: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new ScreenshotsDir(source);
+	        return new ScreenshotCollection(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -139,9 +127,27 @@ export namespace screenshots {
 	        this.userId = source["userId"];
 	        this.gameId = source["gameId"];
 	        this.gameName = source["gameName"];
-	        this.screenshots = source["screenshots"];
+	        this.screenshots = this.convertValues(source["screenshots"], ScreenshotEntry);
 	        this.totalCount = source["totalCount"];
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 
 }

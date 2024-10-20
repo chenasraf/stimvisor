@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Sidebar } from './components/Sidebar/Sidebar'
 import React, { useEffect, useState } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
-import { GetSteamLibraryMeta, OnWindowResize } from '../wailsjs/go/main/App'
+import { GetLibraryInfo, OnWindowResize } from '../wailsjs/go/main/App'
 import { ScreenshotsPage } from './pages/Screenshots/ScreenshotsPage'
 import { useApi } from './common/api'
 import { AppContext } from './common/app_context'
@@ -21,7 +21,7 @@ function App() {
         <AppContextProvider>
           <div id="App" className="min-h-screen flex">
             <Sidebar className="min-w-64 w-64" />
-            <div className="max-h-screen overflow-y-auto">
+            <div className="max-h-screen overflow-y-auto w-full">
               <Routes>
                 <Route path="/" element={<GamesPage />} />
                 <Route path="/games" element={<GamesPage />} />
@@ -36,7 +36,7 @@ function App() {
 }
 
 function AppContextProvider({ children }: React.PropsWithChildren<object>) {
-  const { data: meta, isFetching } = useApi(GetSteamLibraryMeta, ['meta'], {
+  const { data: meta, isFetching } = useApi(GetLibraryInfo, ['meta'], {
     initialData: {} as never,
     debug: true,
   })
