@@ -45,6 +45,7 @@ function ScreenshotsHome() {
     setModalIndex(null)
     setModalScreenshots([])
   }, [])
+
   return (
     <div className="relative">
       <h1 className="sticky top-0 p-4 bg-background text-2xl z-10">Screenshots</h1>

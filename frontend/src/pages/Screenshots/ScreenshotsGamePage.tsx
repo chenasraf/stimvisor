@@ -7,7 +7,6 @@ import { FaAngleLeft } from 'react-icons/fa6'
 import { ScreenshotImg } from '@/components/ScreenshotImg/ScreenshotImg'
 import { useCallback, useMemo, useState } from 'react'
 import { ScreenshotsCarouselModal } from '@/components/ScreenshotsCarouselModal/ScreenshotsCarouselModal'
-import { screenshots } from '$models'
 import { Dialog } from '@/components/ui/dialog'
 
 function useScreenshotsDir(gameId: string) {
@@ -40,6 +39,7 @@ function ScreenshotsGamePage() {
   const closeScreenshotsModal = useCallback(() => {
     setModalIndex(null)
   }, [])
+
   return (
     <div className="relative">
       <div className="sticky top-0 p-4 bg-background flex flex-col gap-2 z-10">
@@ -52,7 +52,7 @@ function ScreenshotsGamePage() {
           </Button>
         </div>
         <div className="flex items-center gap-2 justify-between">
-          <h1 className="text-2xl p-4 bg-background">
+          <h1 className="text-2xl py-4 bg-background">
             Screenshots for <span className="text-black dark:text-white">{dir.gameName}</span>
           </h1>
           <div className="flex items-center gap-2">
