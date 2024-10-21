@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Sidebar } from './components/Sidebar/Sidebar'
+import { MainSidebar } from './components/MainSidebar/MainSidebar'
 import React, { useEffect, useState } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import { GetLibraryInfo, OnWindowResize } from '$app'
@@ -20,11 +20,11 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <AppContextProvider>
           <div id="App" className="min-h-screen flex">
-            <Sidebar className="min-w-64 w-64" />
+            <MainSidebar className="min-w-64 w-64" />
             <div className="max-h-screen overflow-y-auto w-full">
               <Routes>
                 <Route path="/" element={<GamesPage />} />
-                <Route path="/games" element={<GamesPage />} />
+                <Route path="/games/*" element={<GamesPage />} />
                 <Route path="/screenshots/*" element={<ScreenshotsHomePage />} />
               </Routes>
             </div>

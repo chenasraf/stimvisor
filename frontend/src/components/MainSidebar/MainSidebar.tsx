@@ -3,10 +3,15 @@ import React, { useCallback, useMemo } from 'react'
 import { cn } from '@/common/utils'
 import { Link, useLocation } from 'react-router-dom'
 import { cva } from 'class-variance-authority'
+import LogoSvg from '@/assets/images/logo.svg'
 
-export function Sidebar({ className, ...rest }: HtmlProps<'div'>) {
+export function MainSidebar({ className, ...rest }: HtmlProps<'div'>) {
   return (
     <div className={cn('py-3 bg-black/30 h-screen overflow-y-auto', className)} {...rest}>
+      <Link className="text-2xl px-5 py-2 flex items-center gap-4" to="/">
+        <img className="h-10 w-auto" src={LogoSvg} alt="SV" />
+        StimVisor
+      </Link>
       <ul>
         <ListItem label="Games" to="/games" match={(p) => p === '/' || p.startsWith('/games')} />
         <ListItem
