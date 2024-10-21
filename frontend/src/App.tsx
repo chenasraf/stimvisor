@@ -3,7 +3,7 @@ import { Sidebar } from './components/Sidebar/Sidebar'
 import React, { useEffect, useState } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import { GetLibraryInfo, OnWindowResize } from '$app'
-import { ScreenshotsPage } from './pages/Screenshots/ScreenshotsPage'
+import { ScreenshotsHomePage } from './pages/Screenshots/ScreenshotsHomePage'
 import { useApi } from './common/api'
 import { AppContext } from './common/app_context'
 import { LoadingContainer } from './components/Loader/LoadingContainer'
@@ -25,7 +25,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<GamesPage />} />
                 <Route path="/games" element={<GamesPage />} />
-                <Route path="/screenshots/*" element={<ScreenshotsPage />} />
+                <Route path="/screenshots/*" element={<ScreenshotsHomePage />} />
               </Routes>
             </div>
           </div>
