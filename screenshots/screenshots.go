@@ -74,7 +74,7 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 			continue
 		}
 		s.TotalCount++
-		if limit > 0 && i >= limit {
+		if limit > 0 && i > limit {
 			continue
 		}
 		b64 += base64.StdEncoding.EncodeToString(bytes)

@@ -6,10 +6,8 @@ export function ScreenshotImg({
   className,
   screenshot,
   ...rest
-}: HtmlProps<'div'> & { screenshot: screenshots.ScreenshotEntry }) {
+}: Omit<HtmlProps<'img'>, 'src'> & { screenshot: screenshots.ScreenshotEntry }) {
   return (
-    <div className={cn('', rest.onClick && 'cursor-pointer', className)} {...rest}>
-      <img className="rounded-md" src={screenshot.base64} alt={screenshot.name} />
-    </div>
+    <img className={cn('rounded-md', rest.onClick && 'cursor-pointer', className)} src={screenshot.base64} alt={screenshot.name} {...rest} />
   )
 }

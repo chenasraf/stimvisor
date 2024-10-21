@@ -22,14 +22,12 @@ export function ScreenshotsCarouselModal({
 }) {
   return (
     <div className={cn('', className)} {...rest}>
-      <DialogContent className="max-w-[calc(100%_-_128px)]">
+      <DialogContent className="max-w-[calc(100%_-_128px)] max-h-[calc(100%_-_64px)]">
         <Carousel opts={{ startIndex: activeIndex ?? undefined }}>
-          <CarouselContent>
+          <CarouselContent className="max-w-full max-h-full">
             {screenshots.map((scr) => (
-              <CarouselItem key={scr.path}>
-                <div className="h-full flex items-center">
-                  <ScreenshotImg screenshot={scr} />
-                </div>
+              <CarouselItem key={scr.path} className="flex items-center justify-center">
+                <ScreenshotImg screenshot={scr} className="max-h-[calc(100vh_-_128px)] object-cover mx-auto" />
               </CarouselItem>
             ))}
           </CarouselContent>
