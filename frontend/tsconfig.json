@@ -11,6 +11,18 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "$app": [
+        "./wailsjs/go/main/App"
+      ],
+      "$main/*": [
+        "./wailsjs/go/main/*"
+      ],
+      "$runtime/*": [
+        "./wailsjs/runtime/*"
+      ],
+      "$models": [
+        "./wailsjs/go/models"
       ]
     },
     "allowJs": false,

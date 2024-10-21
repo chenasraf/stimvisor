@@ -1,9 +1,8 @@
 import { Link, Route, Routes, useParams } from 'react-router-dom'
-import { GetScreenshots, GetScreenshotsForGame, NativeOpen } from '../../../wailsjs/go/main/App'
-import { useApi } from '../../common/api'
-import { useAppContext } from '../../common/app_context'
-import { cn } from '../../common/utils'
-import { LoadingContainer } from '../../components/Loader/LoadingContainer'
+import { GetScreenshots, GetScreenshotsForGame, NativeOpen } from '$app'
+import { useApi } from '@/common/api'
+import { useAppContext } from '@/common/app_context'
+import { LoadingContainer } from '@/components/Loader/LoadingContainer'
 import { Button } from '@/components/ui/button'
 import { FaAngleLeft } from 'react-icons/fa6'
 
@@ -51,7 +50,7 @@ function ScreenshotsHome() {
 
       <div>
         <LoadingContainer loading={isFetching}>
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-2">
             {screenshots.screenshotCollections?.map((dir) => (
               <div key={dir.dir} className="flex flex-col gap-4 p-4">
                 <div className="sticky top-[32px] bg-background flex items-center gap-2 justify-between z-0">
@@ -99,7 +98,9 @@ function ScreenshotsGamePage() {
           </Button>
         </div>
         <div className="flex items-center gap-2 justify-between">
-          <h1 className="text-2xl p-4 bg-background">Screenshots for {dir.gameName}</h1>
+          <h1 className="text-2xl p-4 bg-background">
+            Screenshots for <span className="text-black dark:text-white">{dir.gameName}</span>
+          </h1>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => NativeOpen(dir.dir)}>
               Browse Folder

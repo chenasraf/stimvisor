@@ -1,6 +1,6 @@
-import { HtmlProps } from '../../common/types'
+import { HtmlProps } from '@/common/types'
 import React, { useCallback, useMemo } from 'react'
-import { cn } from '../../common/utils'
+import { cn } from '@/common/utils'
 import { Link, useLocation } from 'react-router-dom'
 import { cva } from 'class-variance-authority'
 

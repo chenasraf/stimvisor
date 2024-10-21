@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import { main } from '../../wailsjs/go/models'
+import { main } from '$models'
 
 export const AppContext = createContext<AppContext>({ meta: {} as never })
 

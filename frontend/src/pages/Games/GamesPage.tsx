@@ -1,8 +1,8 @@
-import { GetGames } from '../../../wailsjs/go/main/App'
-import { useApi } from '../../common/api'
-import { useAppContext } from '../../common/app_context'
-import { cn } from '../../common/utils'
-import { LoadingContainer } from '../../components/Loader/LoadingContainer'
+import { GetGames } from '$app'
+import { useApi } from '@/common/api'
+import { useAppContext } from '@/common/app_context'
+import { cn } from '@/common/utils'
+import { LoadingContainer } from '@/components/Loader/LoadingContainer'
 
 function useGames() {
   return useApi(GetGames, ['games'], {

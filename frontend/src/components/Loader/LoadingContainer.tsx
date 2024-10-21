@@ -1,5 +1,5 @@
-import { HtmlProps } from '../../common/types'
-import { cn } from '../../common/utils'
+import { HtmlProps } from '@/common/types'
+import { cn } from '@/common/utils'
 import { Loader } from './Loader'
 
 export function LoadingContainer({
