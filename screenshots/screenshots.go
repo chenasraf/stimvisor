@@ -47,13 +47,9 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 	if err != nil {
 		return s
 	}
-	s.TotalCount = len(files)
 	for i, f := range files {
 		if f.IsDir() {
 			continue
-		}
-		if limit > 0 && i >= limit {
-			break
 		}
 		path := fmt.Sprintf("%s/%s", path, f.Name())
 		// s.Screenshots = append(s.Screenshots, fmt.Sprintf("%s/%s", path, f.Name()))
@@ -75,6 +71,10 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 		case "image/png":
 			b64 += "data:image/png;base64,"
 		default:
+			continue
+		}
+		s.TotalCount++
+		if limit > 0 && i >= limit {
 			continue
 		}
 		b64 += base64.StdEncoding.EncodeToString(bytes)
