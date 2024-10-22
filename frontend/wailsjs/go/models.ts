@@ -1,5 +1,37 @@
 export namespace main {
 	
+	export class GameInfoResponse {
+	    error?: string;
+	    game: steam.GameInfo;
+	
+	    static createFrom(source: any = {}) {
+	        return new GameInfoResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.error = source["error"];
+	        this.game = this.convertValues(source["game"], steam.GameInfo);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class GamesResponse {
 	    error?: string;
 	    games: steam.GameInfo[];
@@ -158,6 +190,12 @@ export namespace steam {
 	    id: string;
 	    name: string;
 	    installDir: string;
+	    description: string;
+	    shortDescription: string;
+	    website: string;
+	    backgroundImage: string;
+	    capsuleImage: string;
+	    categories: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new GameInfo(source);
@@ -168,6 +206,12 @@ export namespace steam {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.installDir = source["installDir"];
+	        this.description = source["description"];
+	        this.shortDescription = source["shortDescription"];
+	        this.website = source["website"];
+	        this.backgroundImage = source["backgroundImage"];
+	        this.capsuleImage = source["capsuleImage"];
+	        this.categories = source["categories"];
 	    }
 	}
 

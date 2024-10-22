@@ -3,11 +3,13 @@ import { MainSidebar } from './components/MainSidebar/MainSidebar'
 import React, { useEffect, useState } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import { GetLibraryInfo, OnWindowResize } from '$app'
-import { ScreenshotsHomePage } from './pages/Screenshots/ScreenshotsHomePage'
 import { useApi } from './common/api'
 import { AppContext } from './common/app_context'
 import { LoadingContainer } from './components/Loader/LoadingContainer'
-import { GamesPage } from './pages/Games/GamesPage'
+import { GamesHomePage } from './pages/Games/GamesHomePage'
+import ScreenshotsGamePage from './pages/Screenshots/ScreenshotsGamePage'
+import { ScreenshotsHome } from './pages/Screenshots/ScreenshotsHomePage'
+import { GameInfoPage } from './pages/Games/GameInfoPage'
 
 function App() {
   const [queryClient] = useState(() => new QueryClient())
@@ -23,9 +25,11 @@ function App() {
             <MainSidebar className="min-w-64 w-64" />
             <div className="max-h-screen overflow-y-auto w-full">
               <Routes>
-                <Route path="/" element={<GamesPage />} />
-                <Route path="/games/*" element={<GamesPage />} />
-                <Route path="/screenshots/*" element={<ScreenshotsHomePage />} />
+                <Route path="/" element={<GamesHomePage />} />
+                <Route path="/games/:gameId" element={<GameInfoPage />} />
+                <Route path="/games/" element={<GamesHomePage />} />
+                <Route path="/screenshots/:gameId" element={<ScreenshotsGamePage />} />
+                <Route path="/screenshots/" element={<ScreenshotsHome />} />
               </Routes>
             </div>
           </div>

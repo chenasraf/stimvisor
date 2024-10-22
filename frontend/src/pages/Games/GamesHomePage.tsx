@@ -14,7 +14,7 @@ function useGames() {
   })
 }
 
-export function GamesPage() {
+export function GamesHomePage() {
   const { data, isFetching } = useGames()
   return (
     <div>

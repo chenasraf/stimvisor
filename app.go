@@ -131,6 +131,23 @@ func (a *App) GetGames() GamesResponse {
 	return GamesResponse{Games: games}
 }
 
+type GameInfoResponse struct {
+	Error string         `json:"error,omitempty"`
+	Game  steam.GameInfo `json:"game"`
+}
+
+func GameInfoError(err error) GameInfoResponse {
+	return GameInfoResponse{Error: err.Error()}
+}
+
+func (a *App) GetGameInfo(gameId string) GameInfoResponse {
+	gameInfo, err := steam.GetGameInfo(gameId)
+	if err != nil {
+		return GameInfoError(err)
+	}
+	return GameInfoResponse{Game: gameInfo}
+}
+
 func (a *App) OnWindowResize() {
 	config := config.GetConfig()
 

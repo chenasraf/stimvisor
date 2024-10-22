@@ -40,7 +40,11 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 	s := ScreenshotCollection{}
 	s.Dir = path
 	s.GameId = filepath.Base(getDir(path, 1))
-	s.GameName = steam.GetGameName(s.GameId)
+	info, err := steam.GetGameInfo(s.GameId)
+	if err != nil {
+		return s
+	}
+	s.GameName = info.Name
 	s.UserId = filepath.Base(getDir(path, 4))
 
 	files, err := dir.Readdir(0)

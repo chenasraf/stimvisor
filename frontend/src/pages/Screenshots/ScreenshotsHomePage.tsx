@@ -1,9 +1,8 @@
-import { Link, Route, Routes } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { GetScreenshots, NativeOpen } from '$app'
 import { useApi } from '@/common/api'
 import { LoadingContainer } from '@/components/Loader/LoadingContainer'
 import { Button } from '@/components/ui/button'
-import ScreenshotsGamePage from './ScreenshotsGamePage'
 import { ScreenshotImg } from '@/components/ScreenshotImg/ScreenshotImg'
 import { Dialog } from '@/components/ui/dialog'
 import { useCallback, useState } from 'react'
@@ -21,16 +20,7 @@ function useScreenshotsDirs() {
   }
 }
 
-export function ScreenshotsHomePage() {
-  return (
-    <Routes>
-      <Route path="/:gameId" element={<ScreenshotsGamePage />} />
-      <Route path="/" element={<ScreenshotsHome />} />
-    </Routes>
-  )
-}
-
-function ScreenshotsHome() {
+export function ScreenshotsHome() {
   const { screenshots, isFetching } = useScreenshotsDirs()
   const [modalIndex, setModalIndex] = useState<number | null>(null)
   const [modalScreenshots, setModalScreenshots] = useState<screenshots.ScreenshotEntry[]>([])
