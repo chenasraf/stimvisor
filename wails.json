@@ -1,6 +1,6 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "stimvisor",
+  "name": "StimVisor",
   "outputfilename": "stimvisor",
   "frontend:install": "pnpm install",
   "frontend:build": "pnpm build",
