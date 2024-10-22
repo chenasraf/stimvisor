@@ -1,0 +1,4 @@
+[Desktop Entry]
+Name=StimVisor
+Type=Application
+Exec=/app/bin/stimvisor

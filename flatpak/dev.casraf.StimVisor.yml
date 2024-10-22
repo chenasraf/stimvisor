@@ -53,7 +53,17 @@ modules:
     buildsystem: simple
     sources:
       - type: dir
-        path: .
+        path: ../
     build-commands:
       - PATH=$PATH:$GOROOT/bin:$NODEROOT/bin:$GOBIN wails build -ldflags="-X main.Version=0.0.1 -X main.Build=$(date +%FT%T%z)"
       - install -Dm755 build/bin/stimvisor $FLATPAK_DEST/bin/stimvisor
+      - desktop-file-edit --set-icon=$FLATPAK_ID flatpak/$FLATPAK_ID.desktop
+      - install -Dm644 build/appicon.svg /app/share/icons/hicolor/scalable/apps/$FLATPAK_ID.svg
+      - >
+        for size in {32,64,128,256}; do
+          rsvg-convert build/appicon.svg -w "$size" -h "$size" -a -f png -o "$size.png";
+          install -Dm644 "$size.png" "/app/share/icons/hicolor/${size}x${size}/apps/$FLATPAK_ID.png";
+        done
+      - install -Dm00644 flatpak/$FLATPAK_ID.desktop $FLATPAK_DEST/share/applications/$FLATPAK_ID.desktop
+      - install -Dm00644 flatpak/$FLATPAK_ID.appdata.xml $FLATPAK_DEST/share/appdata/$FLATPAK_ID.appdata.xml
+

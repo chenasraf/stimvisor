@@ -15,9 +15,11 @@ const (
 	LINUX_STEAM_DIR   = "%s/.steam/steam"
 )
 
-const (
-	SYNC_APP_ID = 760
-)
+var STEAM_INTERNAL_IDS = []string{
+	"7",      // Steam Config
+	"760",    // Steam Cloud - Screenshots
+	"241100", // Steam Controller Config
+}
 
 // GetSteamDirectory returns the Steam directory path based on the operating system.
 func GetSteamDirectory() (string, error) {
@@ -73,8 +75,6 @@ func GetSyncDirectory() (string, error) {
 	}
 	return fmt.Sprintf("%s/760", userDir), nil
 }
-
-var STEAM_INTERNAL_IDS = []string{"7", "760"}
 
 // GetUsersDirectories returns a list of directories for all Steam users.
 func GetUsersDirectories() ([]string, error) {

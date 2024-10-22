@@ -68,16 +68,12 @@ const STEAM_API_URL = "https://store.steampowered.com/api/appdetails?appids=%s"
 func FetchGameInfo(gameId string) (map[string]interface{}, error) {
 	cachePath := filepath.Join(GetGameInfoCacheDir(), gameId+".json")
 	url := fmt.Sprintf(STEAM_API_URL, gameId)
+	fmt.Printf("Fetching game info for %s from %s", gameId, url)
 	resp, err := http.Get(url)
 	if err != nil {
 		panic(err)
 	}
 	defer resp.Body.Close()
-	cacheFile, err := os.Create(cachePath)
-	if err != nil {
-		panic(err)
-	}
-	defer cacheFile.Close()
 
 	respBytes, err := io.ReadAll(resp.Body)
 	respJson := make(map[string]interface{})
@@ -91,6 +87,12 @@ func FetchGameInfo(gameId string) (map[string]interface{}, error) {
 	}
 	respGameData := respGame["data"].(map[string]interface{})
 	partBytes, _ := json.Marshal(respGameData)
+
+	cacheFile, err := os.Create(cachePath)
+	if err != nil {
+		panic(err)
+	}
+	defer cacheFile.Close()
 
 	cacheFile.WriteString(string(partBytes))
 

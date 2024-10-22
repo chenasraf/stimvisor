@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2024 Chen Asraf <contact@casraf.dev> -->
+<component type="desktop">
+  <id>dev.casraf.StimVisor</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <name>StimVisor</name>
+  <summary>A Steam library manager for screenshots, screen captures, save data and more.</summary>
+  <description>
+    <ul>
+      <li>Manage, export and share screenshots or screen captures.</li>
+      <li>View game information and manage your installation.</li>
+      <li>Manage your game save data.</li>
+    </ul>
+  </description>
+  <categories>
+    <category>Utility</category>
+  </categories>
+  <url type="homepage">https://github.com/chenasraf/stimvisor</url>
+  <update_contact>contact_at_casraf_dot_dev</update_contact>
+</component>
