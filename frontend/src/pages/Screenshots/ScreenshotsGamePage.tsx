@@ -1,6 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
-import { GetScreenshotsForGame, NativeOpen } from '$app'
-import { useApi } from '@/common/api'
+import { NativeOpen } from '$app'
 import { LoadingContainer } from '@/components/Loader/LoadingContainer'
 import { Button } from '@/components/ui/button'
 import { FaAngleLeft } from 'react-icons/fa6'
@@ -8,25 +7,11 @@ import { ScreenshotImg } from '@/components/ScreenshotImg/ScreenshotImg'
 import { useCallback, useMemo, useState } from 'react'
 import { ScreenshotsCarouselModal } from '@/components/ScreenshotsCarouselModal/ScreenshotsCarouselModal'
 import { Dialog } from '@/components/ui/dialog'
-
-function useScreenshotsDir(gameId: string) {
-  const { data: screenshots, ...rest } = useApi(
-    () => GetScreenshotsForGame(gameId),
-    ['screenshots', 'game', gameId],
-    {
-      debug: true,
-      initialData: {} as never,
-    },
-  )
-  return {
-    screenshots: screenshots ?? {},
-    ...rest,
-  }
-}
+import { useGameScreenshots } from '@/common/hooks/useScreenshots'
 
 function ScreenshotsGamePage() {
   const { gameId } = useParams()
-  const { screenshots, isFetching } = useScreenshotsDir(gameId!)
+  const { screenshots, isFetching } = useGameScreenshots(gameId!)
   const [dir] = screenshots.screenshotCollections ?? [{ screenshots: [] }]
   const [modalIndex, setModalIndex] = useState<number | null>(null)
   const modalScreenshots = useMemo(() => dir.screenshots ?? [], [dir])

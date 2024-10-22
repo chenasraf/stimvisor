@@ -6,6 +6,7 @@ html {
   @apply bg-bg;
   cursor: default;
   user-select: none;
+  font-size: 20px;
 }
 
 input,
