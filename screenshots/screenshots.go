@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/chenasraf/stimvisor/logger"
 	"github.com/chenasraf/stimvisor/steam"
 )
 
@@ -31,9 +32,11 @@ type ScreenshotEntry struct {
 func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 	dir, err := os.Open(path)
 	if os.IsNotExist(err) {
+		logger.Error("Screenshots directory does not exist: ", path)
 		return ScreenshotCollection{}
 	}
 	if err != nil {
+		logger.FatalErr(err)
 		panic(err)
 	}
 	defer dir.Close()
@@ -41,6 +44,7 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 	s.Dir = path
 	s.GameId = filepath.Base(getDir(path, 1))
 	info, err := steam.GetGameInfo(s.GameId)
+	logger.Debug("Screenshots info fetched for %s", s.GameId)
 	if err != nil {
 		return s
 	}
@@ -53,6 +57,7 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 	}
 	for i, f := range files {
 		if f.IsDir() {
+			logger.Debug("Skipping directory %s", f.Name())
 			continue
 		}
 		path := fmt.Sprintf("%s/%s", path, f.Name())
@@ -61,6 +66,7 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 		// Determine the content type of the image file
 		bytes, err := os.ReadFile(path)
 		if err != nil {
+			logger.FatalErr(err)
 			panic(err)
 		}
 
@@ -75,9 +81,11 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 		case "image/png":
 			b64 += "data:image/png;base64,"
 		default:
+			logger.Debug("Unsupported mime type %s for %s", mimeType, f.Name())
 			continue
 		}
 		s.TotalCount++
+		logger.Debug("Found screenshot %s", path)
 		if limit > 0 && i > limit {
 			continue
 		}

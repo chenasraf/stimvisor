@@ -2,9 +2,11 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/chenasraf/stimvisor/common"
+	"github.com/chenasraf/stimvisor/logger"
 )
 
 type Config struct {
@@ -13,21 +15,23 @@ type Config struct {
 }
 
 func (c *Config) Save() {
-	configDir := GetConfigDir()
+	configDir := common.GetConfigDir()
 	configPath := GetConfigPath()
 
 	os.MkdirAll(configDir, os.ModePerm)
 	f, err := os.Create(configPath)
 	if err != nil {
+		logger.FatalErr(err)
 		panic(err)
 	}
 	defer f.Close()
 	json, err := json.Marshal(c)
 	if err != nil {
+		logger.FatalErr(err)
 		panic(err)
 	}
 	f.WriteString(string(json))
-	fmt.Printf("Config saved in: %s\n", configPath)
+	logger.Info("Config saved in: %s", configPath)
 }
 
 func NewConfig() *Config {
@@ -37,16 +41,8 @@ func NewConfig() *Config {
 	}
 }
 
-func GetConfigDir() string {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
-	return filepath.Join(home, ".stimvisor")
-}
-
 func GetConfigPath() string {
-	configDir := GetConfigDir()
+	configDir := common.GetConfigDir()
 	configPath := filepath.Join(configDir, "config.json")
 	return configPath
 }
@@ -54,8 +50,8 @@ func GetConfigPath() string {
 func GetConfig() Config {
 	configPath := GetConfigPath()
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		fmt.Printf("Config file not found: %s\n", configPath)
-		fmt.Println("Creating new config file")
+		logger.Warn("Config file not found: %s", configPath)
+		logger.Info("Creating new config file")
 		config := NewConfig()
 		config.Save()
 		return *config
@@ -65,14 +61,16 @@ func GetConfig() Config {
 	configFile, err := os.ReadFile(configPath)
 
 	if err != nil {
+		logger.FatalErr(err)
 		panic(err)
 	}
 
 	err = json.Unmarshal([]byte(configFile), config)
 	if err != nil {
+		logger.FatalErr(err)
 		panic(err)
 	}
-	fmt.Printf("Config loaded from: %s\n", configPath)
+	logger.Info("Config loaded from: %s", configPath)
 
 	return *config
 }

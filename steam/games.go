@@ -8,8 +8,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/chenasraf/stimvisor/config"
+	"github.com/chenasraf/stimvisor/common"
 	"github.com/chenasraf/stimvisor/dirs"
+	"github.com/chenasraf/stimvisor/logger"
 
 	"github.com/Goldziher/go-utils/sliceutils"
 )
@@ -71,7 +72,7 @@ func GetGameInfo(gameId string) (GameInfo, error) {
 
 // GetGameInfoCacheDir returns the directory path for caching game information.
 func GetGameInfoCacheDir() string {
-	configDir := config.GetConfigDir()
+	configDir := common.GetConfigDir()
 	return filepath.Join(configDir, "cache", "gameinfo")
 }
 
@@ -94,6 +95,7 @@ func loadGameInfo(gameId string) (map[string]interface{}, error) {
 		return info, err
 	}
 	json.Unmarshal(f, &info)
+	logger.Debug("Loaded game info for %s from cache", gameId)
 	return info, nil
 }
 
@@ -104,9 +106,10 @@ func fetchGameInfo(gameId string) (map[string]interface{}, error) {
 	os.MkdirAll(GetGameInfoCacheDir(), 0755)
 	cachePath := filepath.Join(GetGameInfoCacheDir(), gameId+".json")
 	url := fmt.Sprintf(STEAM_API_URL, gameId)
-	fmt.Printf("Fetching game info for %s from %s", gameId, url)
+	logger.Info("Fetching game info for %s from %s", gameId, url)
 	resp, err := http.Get(url)
 	if err != nil {
+		logger.FatalErr(err)
 		panic(err)
 	}
 	defer resp.Body.Close()
@@ -116,12 +119,14 @@ func fetchGameInfo(gameId string) (map[string]interface{}, error) {
 	json.Unmarshal(respBytes, &respJson)
 
 	if respJson[gameId] == nil {
+		logger.Error("Failed to fetch game info for %s", gameId)
 		return map[string]interface{}{}, fmt.Errorf("Failed to fetch game info for %s", gameId)
 	}
 	// extract result->gameId->data
 	respGame := respJson[gameId].(map[string]interface{})
 
 	if respGame["success"] == false || respGame["data"] == nil {
+		logger.Error("Failed to fetch game info for %s", gameId)
 		return map[string]interface{}{}, fmt.Errorf("Failed to fetch game info for %s", gameId)
 	}
 	respGameData := respGame["data"].(map[string]interface{})
@@ -129,10 +134,12 @@ func fetchGameInfo(gameId string) (map[string]interface{}, error) {
 
 	cacheFile, err := os.Create(cachePath)
 	if err != nil {
+		logger.FatalErr(err)
 		panic(err)
 	}
 	defer cacheFile.Close()
 
+	logger.Info("Caching game info for %s", gameId)
 	cacheFile.WriteString(string(partBytes))
 
 	return respGameData, nil

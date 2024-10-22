@@ -6,6 +6,7 @@ toolchain go1.23.0
 
 require (
 	github.com/Goldziher/go-utils v1.8.1
+	github.com/davecgh/go-spew v1.1.1
 	github.com/wailsapp/wails/v2 v2.9.2
 )
 

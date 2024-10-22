@@ -6,6 +6,7 @@ import (
 
 	"github.com/chenasraf/stimvisor/config"
 	"github.com/chenasraf/stimvisor/dirs"
+	"github.com/chenasraf/stimvisor/logger"
 	"github.com/chenasraf/stimvisor/native"
 	"github.com/chenasraf/stimvisor/screenshots"
 	"github.com/chenasraf/stimvisor/steam"
@@ -25,6 +26,7 @@ func NewApp() *App {
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
+	logger.Init()
 	a.ctx = ctx
 }
 
@@ -75,6 +77,7 @@ type ScreenshotCollectionResponse struct {
 }
 
 func ScreenshotCollectionError(err error) ScreenshotCollectionResponse {
+	logger.Error("Returning error: %s", err)
 	return ScreenshotCollectionResponse{Error: err.Error()}
 }
 
@@ -83,6 +86,7 @@ const SHORT_SCREENSHOTS_LIMIT = 5
 func (a *App) GetScreenshots() ScreenshotCollectionResponse {
 	screenshotsDirPaths, err := dirs.GetScreenshotsDirs()
 	if err != nil {
+		logger.Error("Returning error: %s", err)
 		return ScreenshotCollectionError(err)
 	}
 	screenshotsDirs := []screenshots.ScreenshotCollection{}
@@ -95,6 +99,7 @@ func (a *App) GetScreenshots() ScreenshotCollectionResponse {
 func (a *App) GetScreenshotsForGame(gameId string) ScreenshotCollectionResponse {
 	screenshotsDirPath, err := dirs.GetScreenshotsDir(gameId)
 	if err != nil {
+		logger.Error("Returning error: %s", err)
 		return ScreenshotCollectionError(err)
 	}
 	screenshotsDir := screenshots.NewScreenshotsDirFromPath(screenshotsDirPath, 0)
@@ -107,16 +112,19 @@ type GamesResponse struct {
 }
 
 func GamesError(err error) GamesResponse {
+	logger.Error("Returning error: %s", err)
 	return GamesResponse{Error: err.Error()}
 }
 
 func (a *App) GetGames() GamesResponse {
 	userId, err := dirs.GetUserId()
 	if err != nil {
+		logger.Error("Returning error: %s", err)
 		return GamesError(err)
 	}
 	gameDirPaths, err := dirs.GetGameDirectories(userId)
 	if err != nil {
+		logger.Error("Returning error: %s", err)
 		return GamesError(err)
 	}
 	games := []steam.GameInfo{}
@@ -137,12 +145,14 @@ type GameInfoResponse struct {
 }
 
 func GameInfoError(err error) GameInfoResponse {
+	logger.Error("Returning error: %s", err)
 	return GameInfoResponse{Error: err.Error()}
 }
 
 func (a *App) GetGameInfo(gameId string) GameInfoResponse {
 	gameInfo, err := steam.GetGameInfo(gameId)
 	if err != nil {
+		logger.Error("Returning error: %s", err)
 		return GameInfoError(err)
 	}
 	return GameInfoResponse{Game: gameInfo}

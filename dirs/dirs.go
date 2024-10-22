@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"slices"
 	"strconv"
+
+	"github.com/chenasraf/stimvisor/logger"
 )
 
 const (
@@ -104,7 +106,7 @@ func GetUserDirectory(userId string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	// fmt.Printf("Get User Dir: %s/userdata/%s\n", steamDir, userId)
+	logger.Info("Get User Dir: %s/userdata/%s", steamDir, userId)
 	return fmt.Sprintf("%s/userdata/%s", steamDir, userId), nil
 }
 
@@ -160,12 +162,12 @@ func GetScreenshotsDirs() ([]string, error) {
 		return nil, err
 	}
 	for _, entry := range entries {
-		// fmt.Printf("Entry: %s\n", entry.Name())
+		logger.Debug("Entry: %s", entry.Name())
 		if !entry.IsDir() {
 			continue
 		}
 		scrDir := fmt.Sprintf("%s/%s/screenshots", remoteDir, entry.Name())
-		// fmt.Printf("Checking: %s\n", scrDir)
+		logger.Debug("Checking: %s", scrDir)
 		if _, err := os.Stat(scrDir); os.IsNotExist(err) {
 			continue
 		}
