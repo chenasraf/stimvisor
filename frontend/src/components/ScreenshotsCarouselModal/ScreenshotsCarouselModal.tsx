@@ -11,7 +11,9 @@ import {
   useCarousel,
 } from '../ui/carousel'
 import { ScreenshotImg } from '../ScreenshotImg/ScreenshotImg'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Button } from '../ui/button'
+import { FaAngleLeft, FaAngleRight } from 'react-icons/fa6'
 
 export function ScreenshotsCarouselModal(
   props: HtmlProps<'div'> & {
@@ -19,58 +21,104 @@ export function ScreenshotsCarouselModal(
     activeIndex?: number | null
   },
 ) {
-  const { className, activeIndex, ...rest } = props
+  const { className, screenshots, activeIndex, ...rest } = props
+  const [idx, setIdx] = useState(activeIndex ?? 0)
+  useEffect(() => {
+    setIdx(activeIndex ?? 0)
+  }, [activeIndex])
+  const visible = useMemo(() => {
+    const thresh = 1
+    const min = idx - thresh
+    const max = idx + thresh
+    let vis = screenshots.slice(Math.max(0, min), Math.min(idx + thresh + 1, screenshots.length))
+    if (min < 0) {
+      vis = screenshots.slice(min).concat(vis)
+    }
+    if (max >= screenshots.length) {
+      vis = vis.concat(screenshots.slice(0, max - screenshots.length + 1))
+    }
+
+    return vis
+  }, [idx, screenshots])
   return (
     <div className={cn('', className)} {...rest}>
       <DialogContent className="max-w-[calc(100%_-_128px)] max-h-[calc(100%_-_64px)]">
         <DialogTitle>Screenshots</DialogTitle>
-        <Carousel opts={{ startIndex: activeIndex ?? undefined, loop: true }}>
-          <CarouselInner {...props} />
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
+        <div className="flex gap-4 items-center w-full">
+          <Button
+            className="flex-shrink-0"
+            variant="outline"
+            size="icon"
+            onClick={() => setIdx((i) => (i === 0 ? screenshots.length - 1 : --i))}
+          >
+            <FaAngleLeft />
+          </Button>
+          <div className="flex-grow flex place-content-center">
+            {visible.map((scr, i) => (
+              <ScreenshotImg
+                key={scr.path}
+                screenshot={scr}
+                className={cn('max-h-[calc(100vh_-_160px)] object-cover', i !== 1 && 'hidden')}
+              />
+            ))}
+          </div>
+          <Button
+            className="flex-shrink-0"
+            variant="outline"
+            size="icon"
+            onClick={() => setIdx((i) => (i === screenshots.length ? 0 : ++i))}
+          >
+            <FaAngleRight />
+          </Button>
+        </div>
       </DialogContent>
     </div>
   )
 }
 
-function CarouselInner({
-  activeIndex,
-  screenshots,
-}: React.ComponentProps<typeof ScreenshotsCarouselModal>) {
-  const carousel = useCarousel()
-  const [inView, setInView] = useState(() => carousel.api?.slidesInView() ?? [])
-  const isInView = useCallback(
-    (idx: number) =>
-      [-2, -1, 0, 1, 2].map((x) => idx + x).some((x) => activeIndex === x || inView.includes(x)),
-    [activeIndex, inView],
-  )
+// <Carousel opts={{ startIndex: activeIndex ?? undefined, loop: false }}>
+//   <CarouselInner {...props} />
+//   <CarouselPrevious />
+//   <CarouselNext />
+// </Carousel>
 
-  useEffect(() => {
-    if (!carousel.api) {
-      return
-    }
-    const { api } = carousel
-    const cb = () => {
-      setInView(api.slidesInView() ?? [])
-    }
-    api.on('slidesInView', cb)
-    return () => {
-      api.off('slidesInView', cb)
-    }
-  }, [carousel])
-
-  return (
-    <CarouselContent className="max-h-full">
-      {screenshots.map((scr, i) => (
-        <CarouselItem key={scr.path} className="flex items-center justify-center">
-          <ScreenshotImg
-            screenshot={scr}
-            load={isInView(i)}
-            className="max-h-[calc(100vh_-_160px)] object-cover mx-auto"
-          />
-        </CarouselItem>
-      ))}
-    </CarouselContent>
-  )
-}
+// function CarouselInner({
+//   activeIndex,
+//   screenshots,
+// }: React.ComponentProps<typeof ScreenshotsCarouselModal>) {
+//   const carousel = useCarousel()
+//   const [inView, setInView] = useState(() => carousel.api?.slidesInView() ?? [])
+//   const isInView = useCallback(
+//     (idx: number) =>
+//       [-2, -1, 0, 1, 2].map((x) => idx + x).some((x) => activeIndex === x || inView.includes(x)),
+//     [activeIndex, inView],
+//   )
+//
+//   useEffect(() => {
+//     if (!carousel.api) {
+//       return
+//     }
+//     const { api } = carousel
+//     const cb = () => {
+//       setInView(api.slidesInView() ?? [])
+//     }
+//     api.on('slidesInView', cb)
+//     return () => {
+//       api.off('slidesInView', cb)
+//     }
+//   }, [carousel])
+//
+//   return (
+//     <CarouselContent className="max-h-full">
+//       {screenshots.map((scr, i) => (
+//         <CarouselItem key={scr.path} className="flex items-center justify-center">
+//           <ScreenshotImg
+//             screenshot={scr}
+//             load={isInView(i)}
+//             className="max-h-[calc(100vh_-_160px)] object-cover"
+//           />
+//         </CarouselItem>
+//       ))}
+//     </CarouselContent>
+//   )
+// }

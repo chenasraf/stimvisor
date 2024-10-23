@@ -37,7 +37,7 @@ export function GameScreenshotsListItem({
           </div>
         </div>
         <div className="flex items-start gap-4 flex-nowrap overflow-x-hidden max-w-full">
-          {coll.screenshots.map((entry, i) => (
+          {(coll.screenshots ?? []).map((entry, i) => (
             <ScreenshotImg
               className="max-w-64 rounded-md"
               screenshot={entry}

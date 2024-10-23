@@ -4,12 +4,15 @@ import { LoadingContainer } from '@/components/Loader/LoadingContainer'
 import { Button } from '@/components/ui/button'
 import { FaAngleLeft } from 'react-icons/fa6'
 import { ScreenshotImg } from '@/components/ScreenshotImg/ScreenshotImg'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ScreenshotsCarouselModal } from '@/components/ScreenshotsCarouselModal/ScreenshotsCarouselModal'
 import { Dialog } from '@/components/ui/dialog'
 import { useGameScreenshots } from '@/common/hooks/useScreenshots'
+import { FixedSizeGrid } from 'react-window'
+import { useStateRef } from '@/common/hooks/useStateRef'
 
 function ScreenshotsGamePage() {
+  const thumbSize = 256 + 8
   const { gameId } = useParams()
   const { screenshots, isFetching } = useGameScreenshots(gameId!)
   const [dir] = screenshots.screenshotCollections ?? [{ screenshots: [] }]
@@ -24,6 +27,53 @@ function ScreenshotsGamePage() {
   const closeScreenshotsModal = useCallback(() => {
     setModalIndex(null)
   }, [])
+
+  const [gridRef, setGridRef] = useStateRef<HTMLDivElement | null>(null)
+  const getColCount = useCallback(
+    () => Math.floor((gridRef?.clientWidth ?? window.innerWidth) / thumbSize),
+    [gridRef?.clientWidth, thumbSize],
+  )
+  const [colCount, setColCount] = useState(getColCount())
+
+  useEffect(() => {
+    const cb = () => {
+      const w = gridRef?.clientWidth ?? window.innerWidth
+      const newColCount = Math.floor(w / thumbSize)
+      console.debug('colCount', newColCount, getColCount())
+      if (newColCount !== colCount) {
+        setColCount(newColCount)
+      }
+    }
+    cb()
+    window.addEventListener('resize', cb)
+    return () => {
+      window.removeEventListener('resize', cb)
+    }
+  }, [colCount, getColCount, gridRef, setGridRef, thumbSize])
+
+  function Cell({
+    columnIndex,
+    rowIndex,
+    style,
+  }: {
+    columnIndex: number
+    rowIndex: number
+    style: React.CSSProperties
+  }) {
+    const i = rowIndex * colCount + columnIndex
+    const file = dir.screenshots[i]
+    if (!file) return null
+    return (
+      <div style={{ width: thumbSize, ...style }} className="p-1">
+        <ScreenshotImg
+          className="rounded-md"
+          screenshot={file}
+          key={file.path}
+          onClick={openScreenshotsModal(i)}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="relative">
@@ -55,15 +105,17 @@ function ScreenshotsGamePage() {
           onOpenChange={(open) => !open && closeScreenshotsModal()}
         >
           <LoadingContainer loading={isFetching}>
-            <div className="flex items-start gap-4 flex-wrap max-w-full">
-              {dir.screenshots.map((file, i) => (
-                <ScreenshotImg
-                  className="max-w-64 rounded-md"
-                  screenshot={file}
-                  key={file.path}
-                  onClick={openScreenshotsModal(i)}
-                />
-              ))}
+            <div ref={setGridRef}>
+              <FixedSizeGrid
+                columnCount={colCount}
+                columnWidth={thumbSize}
+                height={window.innerHeight - 200}
+                rowCount={Math.ceil((dir.screenshots?.length ?? 0) / colCount)}
+                rowHeight={168}
+                width={colCount * (thumbSize + 4)}
+              >
+                {Cell}
+              </FixedSizeGrid>
             </div>
           </LoadingContainer>
           <ScreenshotsCarouselModal screenshots={modalScreenshots} activeIndex={modalIndex} />
@@ -72,4 +124,5 @@ function ScreenshotsGamePage() {
     </div>
   )
 }
+
 export default ScreenshotsGamePage
