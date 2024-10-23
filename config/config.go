@@ -14,6 +14,8 @@ type Config struct {
 	WindowHeight int `json:"windowHeight"`
 }
 
+var config *Config
+
 func (c *Config) Save() {
 	configDir := common.GetConfigDir()
 	configPath := GetConfigPath()
@@ -31,6 +33,7 @@ func (c *Config) Save() {
 		panic(err)
 	}
 	f.WriteString(string(json))
+	config = c
 	logger.Info("Config saved in: %s", configPath)
 }
 
@@ -48,6 +51,9 @@ func GetConfigPath() string {
 }
 
 func GetConfig() Config {
+	if config != nil {
+		return *config
+	}
 	configPath := GetConfigPath()
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		logger.Warn("Config file not found: %s", configPath)
