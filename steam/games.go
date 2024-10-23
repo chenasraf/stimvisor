@@ -72,8 +72,8 @@ func GetGameInfo(gameId string) (GameInfo, error) {
 
 // GetGameInfoCacheDir returns the directory path for caching game information.
 func GetGameInfoCacheDir() string {
-	configDir := common.GetConfigDir()
-	return filepath.Join(configDir, "cache", "gameinfo")
+	cacheDir := common.GetCacheDir()
+	return filepath.Join(cacheDir, "gameinfo")
 }
 
 // loadGameInfo loads the game information from the cache or fetches it if not available.
