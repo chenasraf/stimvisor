@@ -4,20 +4,37 @@ import { screenshots } from '$models'
 import { DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { ScreenshotImg } from '../ScreenshotImg/ScreenshotImg'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button } from '../ui/button'
+import { Button, ButtonProps } from '../ui/button'
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa6'
+import { ManageScreenshot, NativeOpen } from '$app'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../ui/alert-dialog'
+import { FaTrash } from 'react-icons/fa6'
+import { FaArrowUpRightFromSquare } from 'react-icons/fa6'
+import { FaRegFolderOpen } from 'react-icons/fa6'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 
 export function ScreenshotsCarouselModal(
   props: HtmlProps<'div'> & {
     screenshots: screenshots.ScreenshotEntry[]
     activeIndex?: number | null
+    onDeleteScreenshot(idx: number, path: string): void
   },
 ) {
-  const { className, screenshots, activeIndex, ...rest } = props
+  const { className, screenshots, activeIndex, onDeleteScreenshot, ...rest } = props
   const [idx, setIdx] = useState(activeIndex ?? 0)
   useEffect(() => {
     setIdx(activeIndex ?? 0)
   }, [activeIndex])
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const visible = useMemo(() => {
     const thresh = 1
     const min = idx - thresh
@@ -55,6 +72,30 @@ export function ScreenshotsCarouselModal(
     [nextScreenshot, prevScreenshot],
   )
 
+  const handleDelete = useCallback(() => {
+    ManageScreenshot(screenshots[idx].path, 'delete')
+    onDeleteScreenshot?.(idx, screenshots[idx].path)
+  }, [idx, onDeleteScreenshot, screenshots])
+
+  const actions = [
+    {
+      label: 'Open Containing Folder',
+      icon: <FaRegFolderOpen />,
+      onClick: () => NativeOpen(screenshots[idx].dir),
+    },
+    {
+      label: 'Open in Default App',
+      icon: <FaArrowUpRightFromSquare />,
+      onClick: () => NativeOpen(screenshots[idx].path),
+    },
+    {
+      label: 'Delete',
+      icon: <FaTrash />,
+      onClick: () => setConfirmDelete(true),
+      variant: 'destructive',
+    },
+  ]
+
   return (
     <div className={cn('', className)} {...rest} onKeyUp={handleKeyUp}>
       <DialogContent className="max-w-[calc(100%_-_128px)] max-h-[calc(100%_-_64px)]">
@@ -74,7 +115,7 @@ export function ScreenshotsCarouselModal(
               <ScreenshotImg
                 key={scr.path}
                 screenshot={scr}
-                className={cn('max-h-[calc(100vh_-_160px)] object-cover', i !== 1 && 'hidden')}
+                className={cn('max-h-[calc(100vh_-_220px)] object-cover', i !== 1 && 'hidden')}
               />
             ))}
           </div>
@@ -88,7 +129,46 @@ export function ScreenshotsCarouselModal(
             <FaAngleRight />
           </Button>
         </div>
+        <div className="flex place-content-center gap-2">
+          <TooltipProvider>
+            {actions.map((action) => (
+              <Tooltip key={action.label}>
+                <TooltipTrigger>
+                  <Button
+                    size="icon"
+                    variant={(action.variant as ButtonProps['variant']) ?? 'secondary'}
+                    onClick={action.onClick}
+                  >
+                    {action.icon}
+                  </Button>
+                  <TooltipContent>{action.label}</TooltipContent>
+                </TooltipTrigger>
+              </Tooltip>
+            ))}
+          </TooltipProvider>
+        </div>
       </DialogContent>
+      <AlertDialog open={confirmDelete} onOpenChange={(s) => !s && setConfirmDelete(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this screenshot?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action is irreversible. You will delete the file entirely from the file system,
+              not move it into the Trash.
+              <br />
+              <br />
+              Are you sure you want to proceed?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDelete}>
+              <FaTrash />
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

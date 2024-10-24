@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"path/filepath"
-	"time"
 
 	"github.com/chenasraf/stimvisor/config"
 	"github.com/chenasraf/stimvisor/dirs"
@@ -35,14 +34,22 @@ func (a *App) startup(ctx context.Context) {
 }
 
 func (a *App) shutdown(ctx context.Context) {
-	logger.Info("Shutting down server")
-	<-a.server.Stop
+	// ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	// defer cancel()
 
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
+	logger.Info("Shutting down server")
 	if err := a.server.Server.Shutdown(ctx); err != nil {
 		logger.Error("Shutdown error: %s", err)
 	}
+
+	logger.Info("Server shutdown complete")
+
+	// select {
+	// case <-a.server.Stop:
+	// 	logger.Info("Server stopped")
+	// case <-ctx.Done():
+	// 	logger.Warn("Server shutdown timed out")
+	// }
 }
 
 func LibraryMetaInfo(err error) LibraryInfo {
@@ -106,7 +113,14 @@ func (a *App) GetScreenshots() ScreenshotCollectionResponse {
 	}
 	screenshotsDirs := []screenshots.ScreenshotCollection{}
 	for _, path := range screenshotsDirPaths {
-		screenshotsDirs = append(screenshotsDirs, screenshots.NewScreenshotsDirFromPath(path, SHORT_SCREENSHOTS_LIMIT))
+		scr, err := screenshots.NewScreenshotsDirFromPath(path, SHORT_SCREENSHOTS_LIMIT)
+		if err != nil || len(scr.Screenshots) == 0 {
+			if err != nil {
+				logger.Warn("Error fetching screenshots for %s:\n %s", scr.GameId, err)
+			}
+			continue
+		}
+		screenshotsDirs = append(screenshotsDirs, scr)
 	}
 	return ScreenshotCollectionResponse{ScreenshotCollections: screenshotsDirs}
 }
@@ -117,8 +131,15 @@ func (a *App) GetScreenshotsForGame(gameId string) ScreenshotCollectionResponse 
 		logger.Error("Returning error: %s", err)
 		return ScreenshotCollectionError(err)
 	}
-	screenshotsDir := screenshots.NewScreenshotsDirFromPath(screenshotsDirPath, 0)
+	screenshotsDir, err := screenshots.NewScreenshotsDirFromPath(screenshotsDirPath, 0)
+	if err != nil {
+		return ScreenshotCollectionError(err)
+	}
 	return ScreenshotCollectionResponse{ScreenshotCollections: []screenshots.ScreenshotCollection{screenshotsDir}}
+}
+
+func (a *App) ManageScreenshot(path string, action string) error {
+	return screenshots.ManageScreenshot(path, screenshots.ScreensotAction(action))
 }
 
 type GamesResponse struct {

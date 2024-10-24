@@ -5,16 +5,19 @@ import { Button } from '@/components/ui/button'
 import { Link } from 'react-router-dom'
 import { NativeOpen } from '$app'
 import { ScreenshotImg } from '@/components/ScreenshotImg/ScreenshotImg'
+import { useMemo } from 'react'
 
 export function GameScreenshotsListItem({
   className,
   collection: coll,
   onScreenshotClick,
   title,
+  limit = 0,
   ...rest
 }: HtmlProps<'div'> & {
   collection: screenshots.ScreenshotCollection
   title?: React.ReactNode
+  limit?: number
   onScreenshotClick?(
     event: React.MouseEvent<HTMLElement>,
     screenshot: screenshots.ScreenshotEntry,
@@ -22,6 +25,14 @@ export function GameScreenshotsListItem({
     screenshots: screenshots.ScreenshotEntry[],
   ): void
 }) {
+  const scrs = useMemo(() => {
+    let lst = coll.screenshots ?? []
+    if (limit) {
+      lst = lst.slice(0, limit)
+    }
+    return lst
+  }, [coll.screenshots, limit])
+
   return (
     <div className={cn('', className)} {...rest}>
       <div key={coll.dir} className="flex flex-col gap-4 p-4">
@@ -37,7 +48,7 @@ export function GameScreenshotsListItem({
           </div>
         </div>
         <div className="flex items-start gap-4 flex-nowrap overflow-x-hidden max-w-full">
-          {(coll.screenshots ?? []).map((entry, i) => (
+          {scrs.map((entry, i) => (
             <ScreenshotImg
               className="max-w-64 rounded-md"
               screenshot={entry}

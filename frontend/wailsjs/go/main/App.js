@@ -22,6 +22,10 @@ export function GetScreenshotsForGame(arg1) {
   return window['go']['main']['App']['GetScreenshotsForGame'](arg1);
 }
 
+export function ManageScreenshot(arg1, arg2) {
+  return window['go']['main']['App']['ManageScreenshot'](arg1, arg2);
+}
+
 export function NativeOpen(arg1) {
   return window['go']['main']['App']['NativeOpen'](arg1);
 }

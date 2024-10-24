@@ -20,7 +20,12 @@ func StartServer() InternalServer {
 	server.Server = &http.Server{Addr: ":9876", Handler: router}
 
 	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
+	signal.Notify(stop, os.Interrupt, os.Kill)
+
+	server.Server.RegisterOnShutdown(func() {
+		logger.Info("OnShutdown")
+		stop <- os.Interrupt
+	})
 
 	go runImageServer(server.Server)
 
@@ -65,6 +70,8 @@ func (h imageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func runImageServer(server *http.Server) {
 	err := server.ListenAndServe()
 	if err != nil {
-		panic(err)
+		if err.Error() != "http: Server closed" {
+			panic(err)
+		}
 	}
 }
