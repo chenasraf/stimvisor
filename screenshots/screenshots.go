@@ -1,12 +1,13 @@
 package screenshots
 
 import (
-	"encoding/base64"
 	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
+	"github.com/chenasraf/stimvisor/dirs"
 	"github.com/chenasraf/stimvisor/logger"
 	"github.com/chenasraf/stimvisor/steam"
 )
@@ -24,8 +25,8 @@ type ScreenshotCollection struct {
 type ScreenshotEntry struct {
 	Dir      string `json:"dir"`
 	Path     string `json:"path"`
+	URL      string `json:"url"`
 	Name     string `json:"name"`
-	Base64   string `json:"base64"`
 	MimeType string `json:"mimeType"`
 }
 
@@ -43,6 +44,10 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 	s := ScreenshotCollection{}
 	s.Dir = path
 	s.GameId = filepath.Base(getDir(path, 1))
+	steamdir, err := dirs.GetSteamUserDirectory()
+	if err != nil {
+		return s
+	}
 	info, err := steam.GetGameInfo(s.GameId)
 	logger.Debug("Screenshots info fetched for %s", s.GameId)
 	if err != nil {
@@ -89,12 +94,12 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 		if limit > 0 && i > limit {
 			continue
 		}
-		b64 += base64.StdEncoding.EncodeToString(bytes)
+		url, _ := strings.CutPrefix(path, steamdir)
 		entry := ScreenshotEntry{
 			Dir:      filepath.Dir(path),
 			Path:     path,
 			Name:     f.Name(),
-			Base64:   b64,
+			URL:      fmt.Sprintf("http://localhost:9876/images/%s", url),
 			MimeType: mimeType,
 		}
 

@@ -3,19 +3,22 @@ package main
 import (
 	"context"
 	"path/filepath"
+	"time"
 
 	"github.com/chenasraf/stimvisor/config"
 	"github.com/chenasraf/stimvisor/dirs"
 	"github.com/chenasraf/stimvisor/logger"
 	"github.com/chenasraf/stimvisor/native"
 	"github.com/chenasraf/stimvisor/screenshots"
+	"github.com/chenasraf/stimvisor/server"
 	"github.com/chenasraf/stimvisor/steam"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
 type App struct {
-	ctx context.Context
+	ctx    context.Context
+	server server.InternalServer
 }
 
 // NewApp creates a new App application struct
@@ -27,7 +30,19 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	logger.Init()
+	a.server = server.StartServer()
 	a.ctx = ctx
+}
+
+func (a *App) shutdown(ctx context.Context) {
+	logger.Info("Shutting down server")
+	<-a.server.Stop
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	if err := a.server.Server.Shutdown(ctx); err != nil {
+		logger.Error("Shutdown error: %s", err)
+	}
 }
 
 func LibraryMetaInfo(err error) LibraryInfo {

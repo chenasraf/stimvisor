@@ -11,7 +11,7 @@ export function ScreenshotImg({
   return load ? (
     <img
       className={cn('rounded-md', rest.onClick && 'cursor-pointer', className)}
-      src={screenshot.base64}
+      src={screenshot.url}
       alt={screenshot.name}
       {...rest}
     />

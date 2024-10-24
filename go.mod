@@ -7,6 +7,7 @@ toolchain go1.23.0
 require (
 	github.com/Goldziher/go-utils v1.8.1
 	github.com/davecgh/go-spew v1.1.1
+	github.com/wailsapp/mimetype v1.4.1
 	github.com/wailsapp/wails/v2 v2.9.2
 )
 
@@ -32,7 +33,6 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/wailsapp/go-webview2 v1.0.16 // indirect
-	github.com/wailsapp/mimetype v1.4.1 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 // indirect
 	golang.org/x/net v0.25.0 // indirect

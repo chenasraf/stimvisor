@@ -124,8 +124,8 @@ export namespace screenshots {
 	export class ScreenshotEntry {
 	    dir: string;
 	    path: string;
+	    url: string;
 	    name: string;
-	    base64: string;
 	    mimeType: string;
 	
 	    static createFrom(source: any = {}) {
@@ -136,8 +136,8 @@ export namespace screenshots {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.dir = source["dir"];
 	        this.path = source["path"];
+	        this.url = source["url"];
 	        this.name = source["name"];
-	        this.base64 = source["base64"];
 	        this.mimeType = source["mimeType"];
 	    }
 	}

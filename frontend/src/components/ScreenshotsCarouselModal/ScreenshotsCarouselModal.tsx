@@ -44,7 +44,6 @@ export function ScreenshotsCarouselModal(
 
   const handleKeyUp = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
-      e.preventDefault()
       if (e.key === 'ArrowRight') {
         e.preventDefault()
         nextScreenshot()
@@ -61,7 +60,13 @@ export function ScreenshotsCarouselModal(
       <DialogContent className="max-w-[calc(100%_-_128px)] max-h-[calc(100%_-_64px)]">
         <DialogTitle>Screenshots</DialogTitle>
         <div className="flex gap-4 items-center w-full">
-          <Button className="flex-shrink-0" variant="outline" size="icon" onClick={prevScreenshot}>
+          <Button
+            className="flex-shrink-0"
+            variant="outline"
+            size="icon"
+            onClick={prevScreenshot}
+            aria-keyshortcuts="ArrowLeft"
+          >
             <FaAngleLeft />
           </Button>
           <div className="flex-grow flex place-content-center">
@@ -73,7 +78,13 @@ export function ScreenshotsCarouselModal(
               />
             ))}
           </div>
-          <Button className="flex-shrink-0" variant="outline" size="icon" onClick={nextScreenshot}>
+          <Button
+            className="flex-shrink-0"
+            variant="outline"
+            size="icon"
+            onClick={nextScreenshot}
+            aria-keyshortcuts="ArrowRight"
+          >
             <FaAngleRight />
           </Button>
         </div>
