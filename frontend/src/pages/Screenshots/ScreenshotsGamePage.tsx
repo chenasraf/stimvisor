@@ -4,7 +4,7 @@ import { LoadingContainer } from '@/components/Loader/LoadingContainer'
 import { Button } from '@/components/ui/button'
 import { FaAngleLeft } from 'react-icons/fa6'
 import { ScreenshotImg } from '@/components/ScreenshotImg/ScreenshotImg'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ScreenshotsCarouselModal } from '@/components/ScreenshotsCarouselModal/ScreenshotsCarouselModal'
 import { Dialog } from '@/components/ui/dialog'
 import { useGameScreenshots } from '@/common/hooks/useScreenshots'
@@ -28,6 +28,7 @@ function ScreenshotsGamePage() {
     setModalIndex(null)
   }, [])
 
+  const [headerRef, setHeaderRef] = useStateRef<HTMLDivElement | null>(null)
   const [gridRef, setGridRef] = useStateRef<HTMLDivElement | null>(null)
   const getColCount = useCallback(
     () => Math.floor((gridRef?.clientWidth ?? window.innerWidth) / thumbSize),
@@ -77,7 +78,7 @@ function ScreenshotsGamePage() {
 
   return (
     <div className="relative">
-      <div className="sticky top-0 p-4 bg-background flex flex-col gap-2 z-10">
+      <div className="sticky top-0 p-4 bg-background flex flex-col gap-2 z-10" ref={setHeaderRef}>
         <div>
           <Button variant="outline" size="sm" asChild>
             <Link to="/screenshots">
@@ -109,7 +110,7 @@ function ScreenshotsGamePage() {
               <FixedSizeGrid
                 columnCount={colCount}
                 columnWidth={thumbSize}
-                height={window.innerHeight - 200}
+                height={window.innerHeight - (headerRef?.clientHeight ?? 200)}
                 rowCount={Math.ceil((dir.screenshots?.length ?? 0) / colCount)}
                 rowHeight={168}
                 width={colCount * (thumbSize + 4)}
