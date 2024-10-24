@@ -16,6 +16,7 @@ func StartServer() InternalServer {
 	router.Handle("/images/", http.StripPrefix("/images/", imageHandler{}))
 
 	server := InternalServer{}
+	// TODO use env, and retry other ports when needed
 	server.Server = &http.Server{Addr: ":9876", Handler: router}
 
 	stop := make(chan os.Signal, 1)
@@ -46,18 +47,17 @@ func (h imageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fullPath := filepath.Join(basedir, path)
-	logger.Debug("Full path: %s", fullPath)
 	bytes, err := os.ReadFile(fullPath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 	mimeType := mimetype.Detect(bytes)
-	logger.Debug("Mime type: %s", mimeType.String())
 	switch mimeType.String() {
 	case "image/png", "image/jpeg", "image/gif", "image/webp":
-		logger.Debug("Serving image: %s", fullPath)
+		logger.Debug("Serving image: %s (%s)", fullPath, mimeType.String())
 		http.ServeFile(w, r, fullPath)
 	default:
+		logger.Error("Unsupported mime type: %s", mimeType.String())
 		http.Error(w, "Unsupported image type", http.StatusBadRequest)
 	}
 }

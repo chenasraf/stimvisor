@@ -12,7 +12,6 @@ import (
 	"github.com/chenasraf/stimvisor/steam"
 )
 
-// screenshots: /Users/chen/Library/Application\ Support/Steam/userdata/USER_ID/760/remote/GAME_ID/screenshots
 type ScreenshotCollection struct {
 	Dir         string            `json:"dir"`
 	UserId      string            `json:"userId"`
@@ -66,9 +65,6 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 			continue
 		}
 		path := fmt.Sprintf("%s/%s", path, f.Name())
-		// s.Screenshots = append(s.Screenshots, fmt.Sprintf("%s/%s", path, f.Name()))
-		// convert to base64
-		// Determine the content type of the image file
 		bytes, err := os.ReadFile(path)
 		if err != nil {
 			logger.FatalErr(err)
@@ -77,34 +73,30 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 
 		mimeType := http.DetectContentType(bytes)
 
-		// Prepend the appropriate URI scheme header depending
-		// on the MIME type
-		var b64 string
-		switch mimeType {
-		case "image/jpeg":
-			b64 += "data:image/jpeg;base64,"
-		case "image/png":
-			b64 += "data:image/png;base64,"
-		default:
+		supportedMimeTypes := []string{"image/jpeg", "image/png"}
+		isSupported := strings.Contains(strings.Join(supportedMimeTypes, " "), mimeType)
+		if !isSupported {
 			logger.Debug("Unsupported mime type %s for %s", mimeType, f.Name())
 			continue
 		}
 		s.TotalCount++
-		logger.Debug("Found screenshot %s", path)
 		if limit > 0 && i > limit {
 			continue
 		}
 		url, _ := strings.CutPrefix(path, steamdir)
+		url, _ = strings.CutPrefix(url, "/")
 		entry := ScreenshotEntry{
-			Dir:      filepath.Dir(path),
-			Path:     path,
-			Name:     f.Name(),
+			Dir:  filepath.Dir(path),
+			Path: path,
+			Name: f.Name(),
+			// TODO move URL to consts
 			URL:      fmt.Sprintf("http://localhost:9876/images/%s", url),
 			MimeType: mimeType,
 		}
 
 		s.Screenshots = append(s.Screenshots, entry)
 	}
+	logger.Info("Found %d screenshots for %s", s.TotalCount, s.GameName)
 	return s
 }
 

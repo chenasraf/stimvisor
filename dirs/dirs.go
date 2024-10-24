@@ -162,8 +162,11 @@ func GetScreenshotsDirs() ([]string, error) {
 		return nil, err
 	}
 	for _, entry := range entries {
-		logger.Debug("Entry: %s", entry.Name())
+		// logger.Debug("Entry: %s", entry.Name())
 		if !entry.IsDir() {
+			continue
+		}
+		if slices.Contains(STEAM_INTERNAL_IDS, entry.Name()) {
 			continue
 		}
 		scrDir := fmt.Sprintf("%s/%s/screenshots", remoteDir, entry.Name())
