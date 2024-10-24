@@ -26,8 +26,13 @@ export function GameInfoPage() {
   const { data, isFetching } = useGame(gameId!)
   const { screenshots } = useGameScreenshots(gameId!)
   const game = data.game ?? {}
-  const { modalIndex, closeScreenshotsModal, openScreenshotsModal, modalScreenshots } =
-    useScreenshotsModal()
+  const {
+    modalIndex,
+    modalScreenshots,
+    closeScreenshotsModal,
+    deleteScreenshot,
+    openScreenshotsModal,
+  } = useScreenshotsModal()
   const [dir] = screenshots.screenshotCollections ?? [{ screenshots: [] }]
 
   return (
@@ -65,7 +70,11 @@ export function GameInfoPage() {
                     onScreenshotClick={(_e, _s, i, l) => openScreenshotsModal(i, l)}
                   />
                 </div>
-                <ScreenshotsCarouselModal screenshots={modalScreenshots} activeIndex={modalIndex} />
+                <ScreenshotsCarouselModal
+                  screenshots={modalScreenshots}
+                  activeIndex={modalIndex}
+                  onDeleteScreenshot={deleteScreenshot}
+                />
               </div>
             )}
           </div>

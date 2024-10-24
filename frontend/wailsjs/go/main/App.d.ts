@@ -12,6 +12,8 @@ export function GetScreenshots():Promise<main.ScreenshotCollectionResponse>;
 
 export function GetScreenshotsForGame(arg1:string):Promise<main.ScreenshotCollectionResponse>;
 
+export function ManageScreenshot(arg1:string,arg2:string):Promise<void>;
+
 export function NativeOpen(arg1:string):Promise<void>;
 
 export function OnWindowResize():Promise<void>;

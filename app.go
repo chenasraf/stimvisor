@@ -106,7 +106,14 @@ func (a *App) GetScreenshots() ScreenshotCollectionResponse {
 	}
 	screenshotsDirs := []screenshots.ScreenshotCollection{}
 	for _, path := range screenshotsDirPaths {
-		screenshotsDirs = append(screenshotsDirs, screenshots.NewScreenshotsDirFromPath(path, SHORT_SCREENSHOTS_LIMIT))
+		scr, err := screenshots.NewScreenshotsDirFromPath(path, SHORT_SCREENSHOTS_LIMIT)
+		if err != nil || len(scr.Screenshots) == 0 {
+			if err != nil {
+				logger.Warn("Error fetching screenshots for %s:\n %s", scr.GameId, err)
+			}
+			continue
+		}
+		screenshotsDirs = append(screenshotsDirs, scr)
 	}
 	return ScreenshotCollectionResponse{ScreenshotCollections: screenshotsDirs}
 }
@@ -117,8 +124,15 @@ func (a *App) GetScreenshotsForGame(gameId string) ScreenshotCollectionResponse 
 		logger.Error("Returning error: %s", err)
 		return ScreenshotCollectionError(err)
 	}
-	screenshotsDir := screenshots.NewScreenshotsDirFromPath(screenshotsDirPath, 0)
+	screenshotsDir, err := screenshots.NewScreenshotsDirFromPath(screenshotsDirPath, 0)
+	if err != nil {
+		return ScreenshotCollectionError(err)
+	}
 	return ScreenshotCollectionResponse{ScreenshotCollections: []screenshots.ScreenshotCollection{screenshotsDir}}
+}
+
+func (a *App) ManageScreenshot(path string, action string) error {
+	return screenshots.ManageScreenshot(path, screenshots.ScreensotAction(action))
 }
 
 type GamesResponse struct {

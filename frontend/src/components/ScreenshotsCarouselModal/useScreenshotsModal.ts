@@ -16,5 +16,22 @@ export function useScreenshotsModal() {
     setModalScreenshots([])
   }, [])
 
-  return { modalIndex, modalScreenshots, openScreenshotsModal, closeScreenshotsModal }
+  const deleteScreenshot = useCallback((idx: number) => {
+    setModalScreenshots((screenshots) => {
+      const newScreenshots = [...screenshots]
+      newScreenshots.splice(idx, 1)
+      return newScreenshots
+    })
+    // if (modalIndex === idx) {
+    //   setModalIndex((i) => (i === 0 ? null : i! - 1))
+    // }
+  }, [])
+
+  return {
+    modalIndex,
+    modalScreenshots,
+    openScreenshotsModal,
+    closeScreenshotsModal,
+    deleteScreenshot,
+  }
 }

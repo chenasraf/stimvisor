@@ -4,29 +4,35 @@ import { LoadingContainer } from '@/components/Loader/LoadingContainer'
 import { Button } from '@/components/ui/button'
 import { FaAngleLeft } from 'react-icons/fa6'
 import { ScreenshotImg } from '@/components/ScreenshotImg/ScreenshotImg'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ScreenshotsCarouselModal } from '@/components/ScreenshotsCarouselModal/ScreenshotsCarouselModal'
 import { Dialog } from '@/components/ui/dialog'
 import { useGameScreenshots } from '@/common/hooks/useScreenshots'
 import { FixedSizeGrid } from 'react-window'
 import { useStateRef } from '@/common/hooks/useStateRef'
+import { useScreenshotsModal } from '@/components/ScreenshotsCarouselModal/useScreenshotsModal'
 
 function ScreenshotsGamePage() {
   const thumbSize = 256 + 8
   const { gameId } = useParams()
-  const { screenshots, isFetching } = useGameScreenshots(gameId!)
+  const { screenshots, isPending, refetch } = useGameScreenshots(gameId!)
   const [dir] = screenshots.screenshotCollections ?? [{ screenshots: [] }]
-  const [modalIndex, setModalIndex] = useState<number | null>(null)
-  const modalScreenshots = useMemo(() => dir.screenshots ?? [], [dir])
-  const openScreenshotsModal = useCallback(
-    (index: number) => () => {
-      setModalIndex(index)
+  const {
+    modalIndex,
+    modalScreenshots,
+    closeScreenshotsModal,
+    openScreenshotsModal,
+    deleteScreenshot,
+  } = useScreenshotsModal()
+
+  const handleDeleteScreenshot = useCallback(
+    (idx: number) => {
+      console.debug('deleteScreenshot', idx)
+      deleteScreenshot(idx)
+      refetch()
     },
-    [],
+    [deleteScreenshot, refetch],
   )
-  const closeScreenshotsModal = useCallback(() => {
-    setModalIndex(null)
-  }, [])
 
   const [headerRef, setHeaderRef] = useStateRef<HTMLDivElement | null>(null)
   const [gridRef, setGridRef] = useStateRef<HTMLDivElement | null>(null)
@@ -70,7 +76,7 @@ function ScreenshotsGamePage() {
           className="rounded-md"
           screenshot={file}
           key={file.path}
-          onClick={openScreenshotsModal(i)}
+          onClick={() => openScreenshotsModal(i, dir.screenshots)}
         />
       </div>
     )
@@ -105,12 +111,12 @@ function ScreenshotsGamePage() {
           open={modalIndex !== null}
           onOpenChange={(open) => !open && closeScreenshotsModal()}
         >
-          <LoadingContainer loading={isFetching}>
+          <LoadingContainer loading={isPending}>
             <div ref={setGridRef}>
               <FixedSizeGrid
                 columnCount={colCount}
                 columnWidth={thumbSize}
-                height={window.innerHeight - (headerRef?.clientHeight ?? 200)}
+                height={window.innerHeight - (headerRef?.clientHeight ?? 224) - 24}
                 rowCount={Math.ceil((dir.screenshots?.length ?? 0) / colCount)}
                 rowHeight={168}
                 width={colCount * (thumbSize + 4)}
@@ -119,7 +125,11 @@ function ScreenshotsGamePage() {
               </FixedSizeGrid>
             </div>
           </LoadingContainer>
-          <ScreenshotsCarouselModal screenshots={modalScreenshots} activeIndex={modalIndex} />
+          <ScreenshotsCarouselModal
+            screenshots={modalScreenshots}
+            activeIndex={modalIndex}
+            onDeleteScreenshot={handleDeleteScreenshot}
+          />
         </Dialog>
       </div>
     </div>

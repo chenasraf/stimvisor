@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/Goldziher/go-utils/sliceutils"
 	"github.com/chenasraf/stimvisor/common"
 	"github.com/chenasraf/stimvisor/dirs"
 	"github.com/chenasraf/stimvisor/logger"
@@ -31,15 +32,15 @@ type ScreenshotEntry struct {
 	MimeType string `json:"mimeType"`
 }
 
-func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
+func NewScreenshotsDirFromPath(path string, limit int) (ScreenshotCollection, error) {
 	dir, err := os.Open(path)
 	if os.IsNotExist(err) {
 		logger.Error("Screenshots directory does not exist: ", path)
-		return ScreenshotCollection{}
+		return ScreenshotCollection{}, fmt.Errorf("Screenshots directory does not exist: %s", path)
 	}
 	if err != nil {
 		logger.FatalErr(err)
-		panic(err)
+		return ScreenshotCollection{}, err
 	}
 	defer dir.Close()
 	s := ScreenshotCollection{}
@@ -47,19 +48,19 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 	s.GameId = filepath.Base(baseDirCount(path, 1))
 	steamdir, err := dirs.GetSteamUserDirectory()
 	if err != nil {
-		return s
+		return s, err
 	}
 	info, err := steam.GetGameInfo(s.GameId)
 	logger.Debug("Screenshots info fetched for %s", s.GameId)
 	if err != nil {
-		return s
+		return s, err
 	}
 	s.GameName = info.Name
 	s.UserId = filepath.Base(baseDirCount(path, 4))
 
 	files, err := dir.Readdir(0)
 	if err != nil {
-		return s
+		return s, err
 	}
 	for i, f := range files {
 		if f.IsDir() {
@@ -70,13 +71,13 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 		bytes, err := os.ReadFile(path)
 		if err != nil {
 			logger.FatalErr(err)
-			panic(err)
+			return s, err
 		}
 
 		mimeType := http.DetectContentType(bytes)
 
 		supportedMimeTypes := []string{"image/jpeg", "image/png"}
-		isSupported := strings.Contains(strings.Join(supportedMimeTypes, " "), mimeType)
+		isSupported := sliceutils.Includes(supportedMimeTypes, mimeType)
 		if !isSupported {
 			logger.Debug("Unsupported mime type %s for %s", mimeType, f.Name())
 			continue
@@ -99,18 +100,23 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 		s.Screenshots = append(s.Screenshots, entry)
 	}
 	logger.Info("Found %d screenshots for %s", s.TotalCount, s.GameName)
-	return s
+	return s, err
+}
+
+func GetScreenshotsRoot() (string, error) {
+	syncDir, err := dirs.GetSyncDirectory()
+	if err != nil {
+		return "", err
+	}
+	remoteDir := fmt.Sprintf("%s/remote", syncDir)
+	return remoteDir, nil
 }
 
 // GetAllDirs returns a list of directories for all screenshots of all games.
 func GetAllDirs() ([]string, error) {
-	syncDir, err := dirs.GetSyncDirectory()
-	if err != nil {
-		return nil, err
-	}
+	rootDir, err := GetScreenshotsRoot()
 	var dirs []string
-	remoteDir := fmt.Sprintf("%s/remote", syncDir)
-	entries, err := os.ReadDir(remoteDir)
+	entries, err := os.ReadDir(rootDir)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +128,7 @@ func GetAllDirs() ([]string, error) {
 		if slices.Contains(common.STEAM_INTERNAL_IDS, entry.Name()) {
 			continue
 		}
-		scrDir := fmt.Sprintf("%s/%s/screenshots", remoteDir, entry.Name())
+		scrDir := fmt.Sprintf("%s/%s/screenshots", rootDir, entry.Name())
 		logger.Debug("Checking: %s", scrDir)
 		if _, err := os.Stat(scrDir); os.IsNotExist(err) {
 			continue
@@ -139,6 +145,32 @@ func GetDirForGame(gameId string) (string, error) {
 		return "", err
 	}
 	return fmt.Sprintf("%s/remote/%s/screenshots", syncDir, gameId), nil
+}
+
+type ScreensotAction string
+
+const (
+	DeleteScreenshotAction ScreensotAction = "delete"
+)
+
+func ManageScreenshot(path string, action ScreensotAction) error {
+	switch string(action) {
+	case "delete":
+		scrDir, err := GetScreenshotsRoot()
+		if err != nil {
+			return err
+		}
+		fileIsInScreenshotsDir := strings.HasPrefix(path, scrDir)
+		if !fileIsInScreenshotsDir {
+			return fmt.Errorf("File is not in screenshots directory")
+		}
+		logger.Info("Deleting screenshot: %s", path)
+		err = os.Remove(path)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func baseDirCount(path string, depth int) string {
