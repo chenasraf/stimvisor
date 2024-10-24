@@ -5,8 +5,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
+	"github.com/chenasraf/stimvisor/common"
 	"github.com/chenasraf/stimvisor/dirs"
 	"github.com/chenasraf/stimvisor/logger"
 	"github.com/chenasraf/stimvisor/steam"
@@ -42,7 +44,7 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 	defer dir.Close()
 	s := ScreenshotCollection{}
 	s.Dir = path
-	s.GameId = filepath.Base(getDir(path, 1))
+	s.GameId = filepath.Base(baseDirCount(path, 1))
 	steamdir, err := dirs.GetSteamUserDirectory()
 	if err != nil {
 		return s
@@ -53,7 +55,7 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 		return s
 	}
 	s.GameName = info.Name
-	s.UserId = filepath.Base(getDir(path, 4))
+	s.UserId = filepath.Base(baseDirCount(path, 4))
 
 	files, err := dir.Readdir(0)
 	if err != nil {
@@ -100,7 +102,46 @@ func NewScreenshotsDirFromPath(path string, limit int) ScreenshotCollection {
 	return s
 }
 
-func getDir(path string, depth int) string {
+// GetAllDirs returns a list of directories for all screenshots of all games.
+func GetAllDirs() ([]string, error) {
+	syncDir, err := dirs.GetSyncDirectory()
+	if err != nil {
+		return nil, err
+	}
+	var dirs []string
+	remoteDir := fmt.Sprintf("%s/remote", syncDir)
+	entries, err := os.ReadDir(remoteDir)
+	if err != nil {
+		return nil, err
+	}
+	for _, entry := range entries {
+		// logger.Debug("Entry: %s", entry.Name())
+		if !entry.IsDir() {
+			continue
+		}
+		if slices.Contains(common.STEAM_INTERNAL_IDS, entry.Name()) {
+			continue
+		}
+		scrDir := fmt.Sprintf("%s/%s/screenshots", remoteDir, entry.Name())
+		logger.Debug("Checking: %s", scrDir)
+		if _, err := os.Stat(scrDir); os.IsNotExist(err) {
+			continue
+		}
+		dirs = append(dirs, scrDir)
+	}
+	return dirs, nil
+}
+
+// GetDirForGame returns the directory path for screenshots of a specific game by game ID.
+func GetDirForGame(gameId string) (string, error) {
+	syncDir, err := dirs.GetSyncDirectory()
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s/remote/%s/screenshots", syncDir, gameId), nil
+}
+
+func baseDirCount(path string, depth int) string {
 	for i := 0; i < depth; i++ {
 		path = filepath.Dir(path)
 	}

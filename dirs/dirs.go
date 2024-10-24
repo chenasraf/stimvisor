@@ -5,23 +5,10 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"slices"
-	"strconv"
 
+	"github.com/chenasraf/stimvisor/common"
 	"github.com/chenasraf/stimvisor/logger"
 )
-
-const (
-	DARWIN_STEAM_DIR  = "%s/Library/Application Support/Steam"
-	WINDOWS_STEAM_DIR = "%s/Steam"
-	LINUX_STEAM_DIR   = "%s/.steam/steam"
-)
-
-var STEAM_INTERNAL_IDS = []string{
-	"7",      // Steam Config
-	"760",    // Steam Cloud - Screenshots
-	"241100", // Steam Controller Config
-}
 
 // GetSteamDirectory returns the Steam directory path based on the operating system.
 func GetSteamDirectory() (string, error) {
@@ -36,16 +23,16 @@ func GetSteamDirectory() (string, error) {
 			}
 			localAppData = fmt.Sprintf("%s/AppData/Local", homedir)
 		}
-		return fmt.Sprintf(WINDOWS_STEAM_DIR, localAppData), nil
+		return fmt.Sprintf(common.WINDOWS_STEAM_DIR, localAppData), nil
 	}
 
 	homedir, err := os.UserHomeDir()
 	if err != nil {
 		return "", fmt.Errorf("Could not determine the user's home directory")
 	}
-	format = LINUX_STEAM_DIR
+	format = common.LINUX_STEAM_DIR
 	if osname == "darwin" {
-		format = DARWIN_STEAM_DIR
+		format = common.DARWIN_STEAM_DIR
 	}
 	return fmt.Sprintf(format, homedir), nil
 }
@@ -108,82 +95,4 @@ func GetUserDirectory(userId string) (string, error) {
 	}
 	logger.Info("Get User Dir: %s/userdata/%s", steamDir, userId)
 	return fmt.Sprintf("%s/userdata/%s", steamDir, userId), nil
-}
-
-// GetGameDirectories returns a list of directories for all games of a specific Steam user by user ID.
-func GetGameDirectories(userId string) ([]string, error) {
-	userDir, err := GetUserDirectory(userId)
-	if err != nil {
-		return nil, err
-	}
-
-	entries, err := os.ReadDir(userDir)
-	if err != nil {
-		return nil, err
-	}
-
-	gameDirs := []string{}
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			continue
-		}
-		if slices.Contains(STEAM_INTERNAL_IDS, entry.Name()) {
-			continue
-		}
-		if _, err := strconv.Atoi(entry.Name()); err != nil {
-			continue
-		}
-		gameDir := fmt.Sprintf("%s/%s", userDir, entry.Name())
-		gameDirs = append(gameDirs, gameDir)
-	}
-	return gameDirs, nil
-}
-
-// GetGameDirectory returns the directory path for a specific game by game ID.
-func GetGameDirectory(gameId string) (string, error) {
-	userDir, err := GetSteamUserDirectory()
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%s/%s", userDir, gameId), nil
-}
-
-// GetScreenshotsDirs returns a list of directories for all screenshots of all games.
-func GetScreenshotsDirs() ([]string, error) {
-	syncDir, err := GetSyncDirectory()
-	if err != nil {
-		return nil, err
-	}
-	var dirs []string
-	remoteDir := fmt.Sprintf("%s/remote", syncDir)
-	entries, err := os.ReadDir(remoteDir)
-	if err != nil {
-		return nil, err
-	}
-	for _, entry := range entries {
-		// logger.Debug("Entry: %s", entry.Name())
-		if !entry.IsDir() {
-			continue
-		}
-		if slices.Contains(STEAM_INTERNAL_IDS, entry.Name()) {
-			continue
-		}
-		scrDir := fmt.Sprintf("%s/%s/screenshots", remoteDir, entry.Name())
-		logger.Debug("Checking: %s", scrDir)
-		if _, err := os.Stat(scrDir); os.IsNotExist(err) {
-			continue
-		}
-		dirs = append(dirs, scrDir)
-	}
-	return dirs, nil
-}
-
-// GetScreenshotsDir returns the directory path for screenshots of a specific game by game ID.
-func GetScreenshotsDir(gameId string) (string, error) {
-	syncDir, err := GetSyncDirectory()
-	if err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("%s/remote/%s/screenshots", syncDir, gameId), nil
 }

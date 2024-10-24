@@ -68,7 +68,7 @@ func (a *App) GetLibraryInfo() LibraryInfo {
 	}
 	// fmt.Printf("User Dir: %s\n", userDir)
 	userId := filepath.Base(userDir)
-	gd, err := dirs.GetGameDirectories(userId)
+	gd, err := steam.GetAllDirs(userId)
 	if err != nil {
 		return LibraryMetaInfo(err)
 	}
@@ -99,7 +99,7 @@ func ScreenshotCollectionError(err error) ScreenshotCollectionResponse {
 const SHORT_SCREENSHOTS_LIMIT = 5
 
 func (a *App) GetScreenshots() ScreenshotCollectionResponse {
-	screenshotsDirPaths, err := dirs.GetScreenshotsDirs()
+	screenshotsDirPaths, err := screenshots.GetAllDirs()
 	if err != nil {
 		logger.Error("Returning error: %s", err)
 		return ScreenshotCollectionError(err)
@@ -112,7 +112,7 @@ func (a *App) GetScreenshots() ScreenshotCollectionResponse {
 }
 
 func (a *App) GetScreenshotsForGame(gameId string) ScreenshotCollectionResponse {
-	screenshotsDirPath, err := dirs.GetScreenshotsDir(gameId)
+	screenshotsDirPath, err := screenshots.GetDirForGame(gameId)
 	if err != nil {
 		logger.Error("Returning error: %s", err)
 		return ScreenshotCollectionError(err)
@@ -137,7 +137,7 @@ func (a *App) GetGames() GamesResponse {
 		logger.Error("Returning error: %s", err)
 		return GamesError(err)
 	}
-	gameDirPaths, err := dirs.GetGameDirectories(userId)
+	gameDirPaths, err := steam.GetAllDirs(userId)
 	if err != nil {
 		logger.Error("Returning error: %s", err)
 		return GamesError(err)

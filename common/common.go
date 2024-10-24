@@ -6,6 +6,18 @@ import (
 	"runtime"
 )
 
+const (
+	DARWIN_STEAM_DIR  = "%s/Library/Application Support/Steam"
+	WINDOWS_STEAM_DIR = "%s/Steam"
+	LINUX_STEAM_DIR   = "%s/.steam/steam"
+)
+
+var STEAM_INTERNAL_IDS = []string{
+	"7",      // Steam Config
+	"760",    // Steam Cloud - Screenshots
+	"241100", // Steam Controller Config
+}
+
 func GetConfigDir() string {
 	if os.Getenv("XDG_CONFIG_HOME") != "" {
 		return filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "stimvisor")

@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
+	"strconv"
 
 	"github.com/chenasraf/stimvisor/common"
 	"github.com/chenasraf/stimvisor/dirs"
@@ -30,7 +32,7 @@ type GameInfo struct {
 
 // GetGameInfo retrieves the information of a game given its ID.
 func GetGameInfo(gameId string) (GameInfo, error) {
-	gameDir, err := dirs.GetGameDirectory(gameId)
+	gameDir, err := GetGameDir(gameId)
 	if err != nil {
 		return GameInfo{}, err
 	}
@@ -143,4 +145,43 @@ func fetchGameInfo(gameId string) (map[string]interface{}, error) {
 	cacheFile.WriteString(string(partBytes))
 
 	return respGameData, nil
+}
+
+// GetAllDirs returns a list of directories for all games of a specific Steam user by user ID.
+func GetAllDirs(userId string) ([]string, error) {
+	userDir, err := dirs.GetUserDirectory(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	entries, err := os.ReadDir(userDir)
+	if err != nil {
+		return nil, err
+	}
+
+	gameDirs := []string{}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		if slices.Contains(common.STEAM_INTERNAL_IDS, entry.Name()) {
+			continue
+		}
+		if _, err := strconv.Atoi(entry.Name()); err != nil {
+			continue
+		}
+		gameDir := fmt.Sprintf("%s/%s", userDir, entry.Name())
+		gameDirs = append(gameDirs, gameDir)
+	}
+	return gameDirs, nil
+}
+
+// GetGameDir returns the directory path for a specific game by game ID.
+func GetGameDir(gameId string) (string, error) {
+	userDir, err := dirs.GetSteamUserDirectory()
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%s/%s", userDir, gameId), nil
 }
