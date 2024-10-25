@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { NativeOpen } from '$app'
 import { ScreenshotImg } from '@/components/ScreenshotImg/ScreenshotImg'
 import { useMemo } from 'react'
+import { OpenFolderIcon } from '../Icons/Icons'
 
 export function GameScreenshotsListItem({
   className,
@@ -43,7 +44,7 @@ export function GameScreenshotsListItem({
               <Link to={`/screenshots/${coll.gameId}`}>View All ({coll.totalCount})</Link>
             </Button>
             <Button variant="outline" onClick={() => NativeOpen(coll.dir)}>
-              Browse Folder
+              <OpenFolderIcon />
             </Button>
           </div>
         </div>

@@ -5,7 +5,6 @@ import { DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { ScreenshotImg } from '../ScreenshotImg/ScreenshotImg'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, ButtonProps } from '../ui/button'
-import { FaAngleLeft, FaAngleRight } from 'react-icons/fa6'
 import { ManageScreenshot, NativeOpen } from '$app'
 import {
   AlertDialog,
@@ -17,10 +16,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../ui/alert-dialog'
-import { FaTrash } from 'react-icons/fa6'
-import { FaArrowUpRightFromSquare } from 'react-icons/fa6'
-import { FaRegFolderOpen } from 'react-icons/fa6'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  DeleteIcon,
+  ExternalLinkIcon,
+  OpenFolderIcon,
+} from '../Icons/Icons'
 
 export function ScreenshotsCarouselModal(
   props: HtmlProps<'div'> & {
@@ -80,17 +83,17 @@ export function ScreenshotsCarouselModal(
   const actions = [
     {
       label: 'Open Containing Folder',
-      icon: <FaRegFolderOpen />,
+      icon: <OpenFolderIcon />,
       onClick: () => NativeOpen(screenshots[idx].dir),
     },
     {
       label: 'Open in Default App',
-      icon: <FaArrowUpRightFromSquare />,
+      icon: <ExternalLinkIcon />,
       onClick: () => NativeOpen(screenshots[idx].path),
     },
     {
       label: 'Delete',
-      icon: <FaTrash />,
+      icon: <DeleteIcon />,
       onClick: () => setConfirmDelete(true),
       variant: 'destructive',
     },
@@ -108,7 +111,7 @@ export function ScreenshotsCarouselModal(
             onClick={prevScreenshot}
             aria-keyshortcuts="ArrowLeft"
           >
-            <FaAngleLeft />
+            <ChevronLeftIcon />
           </Button>
           <div className="flex-grow flex place-content-center">
             {visible.map((scr, i) => (
@@ -126,7 +129,7 @@ export function ScreenshotsCarouselModal(
             onClick={nextScreenshot}
             aria-keyshortcuts="ArrowRight"
           >
-            <FaAngleRight />
+            <ChevronRightIcon />
           </Button>
         </div>
         <div className="flex place-content-center gap-2">
@@ -163,7 +166,7 @@ export function ScreenshotsCarouselModal(
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction variant="destructive" onClick={handleDelete}>
-              <FaTrash />
+              <DeleteIcon />
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -2,7 +2,6 @@ import { Link, useParams } from 'react-router-dom'
 import { NativeOpen } from '$app'
 import { LoadingContainer } from '@/components/Loader/LoadingContainer'
 import { Button } from '@/components/ui/button'
-import { FaAngleLeft } from 'react-icons/fa6'
 import { ScreenshotImg } from '@/components/ScreenshotImg/ScreenshotImg'
 import { useCallback, useEffect, useState } from 'react'
 import { ScreenshotsCarouselModal } from '@/components/ScreenshotsCarouselModal/ScreenshotsCarouselModal'
@@ -11,11 +10,26 @@ import { useGameScreenshots } from '@/common/hooks/useScreenshots'
 import { FixedSizeGrid } from 'react-window'
 import { useStateRef } from '@/common/hooks/useStateRef'
 import { useScreenshotsModal } from '@/components/ScreenshotsCarouselModal/useScreenshotsModal'
+import { screenshots } from '$models'
+import { ChevronLeftIcon, OpenFolderIcon } from '@/components/Icons/Icons'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/tooltip'
 
 function ScreenshotsGamePage() {
   const thumbSize = 256 + 8
   const { gameId } = useParams()
   const { screenshots, isPending, refetch } = useGameScreenshots(gameId!)
+  const [selected, setSelected] = useState<string[]>([])
+  const setSelectedValue = useCallback(
+    (file: screenshots.ScreenshotEntry) => () => {
+      setSelected((selected) => {
+        if (selected.includes(file.path)) {
+          return selected.filter((s) => s !== file.path)
+        }
+        return [...selected, file.path]
+      })
+    },
+    [],
+  )
   const [dir] = screenshots.screenshotCollections ?? [{ screenshots: [] }]
   const {
     modalIndex,
@@ -58,29 +72,36 @@ function ScreenshotsGamePage() {
     }
   }, [colCount, getColCount, gridRef, setGridRef, thumbSize])
 
-  function Cell({
-    columnIndex,
-    rowIndex,
-    style,
-  }: {
-    columnIndex: number
-    rowIndex: number
-    style: React.CSSProperties
-  }) {
-    const i = rowIndex * colCount + columnIndex
-    const file = dir.screenshots[i]
-    if (!file) return null
-    return (
-      <div style={{ width: thumbSize, ...style }} className="p-1">
-        <ScreenshotImg
-          className="rounded-md"
-          screenshot={file}
-          key={file.path}
-          onClick={() => openScreenshotsModal(i, dir.screenshots)}
-        />
-      </div>
-    )
-  }
+  const Cell = useCallback(
+    function Cell({
+      columnIndex,
+      rowIndex,
+      style,
+    }: {
+      columnIndex: number
+      rowIndex: number
+      style: React.CSSProperties
+    }) {
+      const i = rowIndex * colCount + columnIndex
+      const file = dir.screenshots[i]
+      const isSelected = Boolean(file) && selected.includes(file.path)
+      if (!file) return null
+      return (
+        <div style={{ width: thumbSize, ...style }} className="p-1">
+          <ScreenshotImg
+            className="rounded-md"
+            selectable
+            selected={isSelected}
+            onToggleSelect={setSelectedValue(file)}
+            screenshot={file}
+            key={file.path}
+            onClick={() => openScreenshotsModal(i, dir.screenshots)}
+          />
+        </div>
+      )
+    },
+    [colCount, dir.screenshots, openScreenshotsModal, selected, setSelectedValue, thumbSize],
+  )
 
   const handleKeyUp = useCallback(
     (e: React.KeyboardEvent) => {
@@ -102,7 +123,7 @@ function ScreenshotsGamePage() {
         <div>
           <Button variant="outline" size="sm" asChild>
             <Link to="/screenshots">
-              <FaAngleLeft />
+              <ChevronLeftIcon />
               Back
             </Link>
           </Button>
@@ -112,9 +133,14 @@ function ScreenshotsGamePage() {
             Screenshots for <span className="text-black dark:text-white">{dir.gameName}</span>
           </h1>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => NativeOpen(dir.dir)}>
-              Browse Folder
-            </Button>
+            <Tooltip>
+              <TooltipTrigger>
+                <Button variant="outline" onClick={() => NativeOpen(dir.dir)}>
+                  <OpenFolderIcon />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Open containing folder</TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </div>

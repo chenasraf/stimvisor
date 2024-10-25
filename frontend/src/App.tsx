@@ -10,6 +10,7 @@ import { GamesHomePage } from './pages/Games/GamesHomePage'
 import ScreenshotsGamePage from './pages/Screenshots/ScreenshotsGamePage'
 import { ScreenshotsHome } from './pages/Screenshots/ScreenshotsHomePage'
 import { GameInfoPage } from './pages/Games/GameInfoPage'
+import { TooltipProvider } from '@ui/tooltip'
 
 function App() {
   const [queryClient] = useState(() => new QueryClient())
@@ -21,18 +22,20 @@ function App() {
     <HashRouter basename="/">
       <QueryClientProvider client={queryClient}>
         <AppContextProvider>
-          <div id="App" className="min-h-screen flex">
-            <MainSidebar className="min-w-64 w-64" />
-            <div className="max-h-screen overflow-y-auto w-full">
-              <Routes>
-                <Route path="/" element={<GamesHomePage />} />
-                <Route path="/games/:gameId" element={<GameInfoPage />} />
-                <Route path="/games/" element={<GamesHomePage />} />
-                <Route path="/screenshots/:gameId" element={<ScreenshotsGamePage />} />
-                <Route path="/screenshots/" element={<ScreenshotsHome />} />
-              </Routes>
+          <TooltipProvider>
+            <div id="App" className="min-h-screen flex">
+              <MainSidebar className="min-w-64 w-64" />
+              <div className="max-h-screen overflow-y-auto w-full">
+                <Routes>
+                  <Route path="/" element={<GamesHomePage />} />
+                  <Route path="/games/:gameId" element={<GameInfoPage />} />
+                  <Route path="/games/" element={<GamesHomePage />} />
+                  <Route path="/screenshots/:gameId" element={<ScreenshotsGamePage />} />
+                  <Route path="/screenshots/" element={<ScreenshotsHome />} />
+                </Routes>
+              </div>
             </div>
-          </div>
+          </TooltipProvider>
         </AppContextProvider>
       </QueryClientProvider>
     </HashRouter>

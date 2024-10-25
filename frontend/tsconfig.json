@@ -12,6 +12,9 @@
       "@/*": [
         "./src/*"
       ],
+      "@ui/*": [
+        "./src/components/ui/*"
+      ],
       "$app": [
         "./wailsjs/go/main/App"
       ],
