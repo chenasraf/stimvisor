@@ -5,9 +5,13 @@ import { GameScreenshotsListItem } from '@/components/GameScreenshotsListItem/Ga
 import { useScreenshotsModal } from '@/components/ScreenshotsCarouselModal/useScreenshotsModal'
 import { useScreenshotsList } from '@/common/hooks/useScreenshots'
 import { useCallback } from 'react'
+import { useRecoverableScrollPosition } from '@/common/hooks/useRecoverableScrollPosition'
 
 export function ScreenshotsHome() {
   const { screenshots, isPending, refetch } = useScreenshotsList()
+
+  useRecoverableScrollPosition(document.querySelector('[data-scroll-root]') as HTMLElement)
+
   const {
     modalIndex,
     closeScreenshotsModal,

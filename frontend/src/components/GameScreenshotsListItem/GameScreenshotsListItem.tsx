@@ -51,7 +51,7 @@ export function GameScreenshotsListItem({
         <div className="flex items-start gap-4 flex-nowrap overflow-x-hidden max-w-full">
           {scrs.map((entry, i) => (
             <ScreenshotImg
-              className="max-w-64 rounded-md"
+              imgClassName="max-w-64"
               screenshot={entry}
               key={entry.path}
               onClick={(e) => onScreenshotClick?.(e, entry, i, coll.screenshots)}

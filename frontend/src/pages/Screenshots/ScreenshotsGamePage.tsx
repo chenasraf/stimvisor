@@ -3,7 +3,7 @@ import { NativeOpen } from '$app'
 import { LoadingContainer } from '@/components/Loader/LoadingContainer'
 import { Button } from '@/components/ui/button'
 import { ScreenshotImg } from '@/components/ScreenshotImg/ScreenshotImg'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ScreenshotsCarouselModal } from '@/components/ScreenshotsCarouselModal/ScreenshotsCarouselModal'
 import { Dialog } from '@/components/ui/dialog'
 import { useGameScreenshots } from '@/common/hooks/useScreenshots'
@@ -13,6 +13,7 @@ import { useScreenshotsModal } from '@/components/ScreenshotsCarouselModal/useSc
 import { screenshots } from '$models'
 import { ChevronLeftIcon, OpenFolderIcon } from '@/components/Icons/Icons'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/tooltip'
+import { useRecoverableScrollPosition } from '@/common/hooks/useRecoverableScrollPosition'
 
 function ScreenshotsGamePage() {
   const thumbSize = 256 + 8
@@ -55,6 +56,13 @@ function ScreenshotsGamePage() {
     [gridRef?.clientWidth, thumbSize],
   )
   const [colCount, setColCount] = useState(getColCount())
+
+  const scrollParent = useMemo(
+    () => gridRef?.firstElementChild?.firstElementChild as HTMLElement,
+    [gridRef],
+  )
+
+  useRecoverableScrollPosition(scrollParent?.parentElement)
 
   useEffect(() => {
     const cb = () => {
@@ -107,14 +115,14 @@ function ScreenshotsGamePage() {
     (e: React.KeyboardEvent) => {
       if (e.key === 'ArrowUp') {
         e.preventDefault()
-        gridRef?.querySelector('>div>div')?.scrollBy(0, -thumbSize)
+        scrollParent?.scrollBy(0, -thumbSize)
       }
       if (e.key === 'ArrowDown') {
         e.preventDefault()
-        gridRef?.querySelector('>div>div')?.scrollBy(0, thumbSize)
+        scrollParent?.scrollBy(0, thumbSize)
       }
     },
-    [gridRef, thumbSize],
+    [scrollParent, thumbSize],
   )
 
   return (
@@ -152,7 +160,7 @@ function ScreenshotsGamePage() {
           onOpenChange={(open) => !open && closeScreenshotsModal()}
         >
           <LoadingContainer loading={isPending}>
-            <div ref={setGridRef}>
+            <div ref={setGridRef} data-grid-container>
               <FixedSizeGrid
                 columnCount={colCount}
                 columnWidth={thumbSize}
@@ -160,6 +168,7 @@ function ScreenshotsGamePage() {
                 rowCount={Math.ceil((dir.screenshots?.length ?? 0) / colCount)}
                 rowHeight={168}
                 width={colCount * (thumbSize + 4)}
+                data-grid
               >
                 {Cell}
               </FixedSizeGrid>

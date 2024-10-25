@@ -5,19 +5,21 @@ import { Checkbox } from '@ui/checkbox'
 
 export function ScreenshotImg({
   className,
+  imgClassName,
   screenshot,
   selectable = false,
   selected = false,
   onToggleSelect,
   ...rest
 }: Omit<HtmlProps<'img'>, 'src'> & {
+  imgClassName?: string
   screenshot: screenshots.ScreenshotEntry
   load?: boolean
   selectable?: boolean
   selected?: boolean
   onToggleSelect?(value: boolean): void
 }) {
-  const img = <img src={screenshot.url} alt={screenshot.name} {...rest} />
+  const img = <img className={imgClassName} src={screenshot.url} alt={screenshot.name} {...rest} />
 
   if (selectable) {
     return (

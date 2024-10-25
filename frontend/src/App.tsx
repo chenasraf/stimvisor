@@ -25,7 +25,7 @@ function App() {
           <TooltipProvider>
             <div id="App" className="min-h-screen flex">
               <MainSidebar className="min-w-64 w-64" />
-              <div className="max-h-screen overflow-y-auto w-full">
+              <div className="max-h-screen overflow-y-auto w-full" data-scroll-root>
                 <Routes>
                   <Route path="/" element={<GamesHomePage />} />
                   <Route path="/games/:gameId" element={<GameInfoPage />} />
