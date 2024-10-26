@@ -1,26 +1,38 @@
 import { Link, useParams } from 'react-router-dom'
-import { NativeOpen } from '$app'
+import { ManageScreenshot, NativeOpen } from '$app'
 import { LoadingContainer } from '@/components/Loader/LoadingContainer'
-import { Button } from '@/components/ui/button'
+import { Button } from '@ui/button'
 import { ScreenshotImg } from '@/components/ScreenshotImg/ScreenshotImg'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ScreenshotsCarouselModal } from '@/components/ScreenshotsCarouselModal/ScreenshotsCarouselModal'
-import { Dialog } from '@/components/ui/dialog'
+import { Dialog } from '@ui/dialog'
 import { useGameScreenshots } from '@/common/hooks/useScreenshots'
 import { FixedSizeGrid } from 'react-window'
 import { useStateRef } from '@/common/hooks/useStateRef'
 import { useScreenshotsModal } from '@/components/ScreenshotsCarouselModal/useScreenshotsModal'
 import { screenshots } from '$models'
-import { ChevronLeftIcon, OpenFolderIcon } from '@/components/Icons/Icons'
+import { CheckDoubleIcon, ChevronLeftIcon, DeleteIcon, OpenFolderIcon } from '@icons'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/tooltip'
 import { useRecoverableScrollPosition } from '@/common/hooks/useRecoverableScrollPosition'
+import { ActionBar, ActionBarActions, ActionBarContent } from '@/components/ActionBar/ActionBar'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@ui/alert-dialog'
 
 function ScreenshotsGamePage() {
   const thumbSize = 256 + 8
   const { gameId } = useParams()
   const { screenshots, isPending, refetch } = useGameScreenshots(gameId!)
   const [selected, setSelected] = useState<string[]>([])
-  const setSelectedValue = useCallback(
+  const [selectionMode, setSelectionMode] = useState(false)
+  const toggleSelectedValue = useCallback(
     (file: screenshots.ScreenshotEntry) => () => {
       setSelected((selected) => {
         if (selected.includes(file.path)) {
@@ -31,6 +43,9 @@ function ScreenshotsGamePage() {
     },
     [],
   )
+  useEffect(() => {
+    setSelectionMode(selected.length > 0)
+  }, [selected.length])
   const [dir] = screenshots.screenshotCollections ?? [{ screenshots: [] }]
   const {
     modalIndex,
@@ -44,6 +59,7 @@ function ScreenshotsGamePage() {
     (idx: number) => {
       console.debug('deleteScreenshot', idx)
       deleteScreenshot(idx)
+      setSelected([])
       refetch()
     },
     [deleteScreenshot, refetch],
@@ -100,15 +116,29 @@ function ScreenshotsGamePage() {
             className="rounded-md"
             selectable
             selected={isSelected}
-            onToggleSelect={setSelectedValue(file)}
+            selectMode={selectionMode}
+            onToggleSelect={toggleSelectedValue(file)}
             screenshot={file}
             key={file.path}
-            onClick={() => openScreenshotsModal(i, dir.screenshots)}
+            onClick={() => {
+              return selectionMode
+                ? toggleSelectedValue(file)()
+                : openScreenshotsModal(i, dir.screenshots)
+            }}
+            onOpenPreview={() => openScreenshotsModal(i, dir.screenshots)}
           />
         </div>
       )
     },
-    [colCount, dir.screenshots, openScreenshotsModal, selected, setSelectedValue, thumbSize],
+    [
+      colCount,
+      dir.screenshots,
+      openScreenshotsModal,
+      selected,
+      selectionMode,
+      toggleSelectedValue,
+      thumbSize,
+    ],
   )
 
   const handleKeyUp = useCallback(
@@ -125,6 +155,18 @@ function ScreenshotsGamePage() {
     [scrollParent, thumbSize],
   )
 
+  const [confirmDelete, setConfirmDelete] = useState<screenshots.ScreenshotEntry[] | null>(null)
+  const handleDelete = useCallback(
+    async (screenshots: screenshots.ScreenshotEntry[]) => {
+      await ManageScreenshot(
+        screenshots.map((s) => s.path),
+        'delete',
+      )
+      setSelected([])
+      refetch()
+    },
+    [refetch],
+  )
   return (
     <div className="relative" onKeyUp={handleKeyUp}>
       <div className="sticky top-0 p-4 bg-background flex flex-col gap-2 z-10" ref={setHeaderRef}>
@@ -151,6 +193,32 @@ function ScreenshotsGamePage() {
             </Tooltip>
           </div>
         </div>
+        {selectionMode && (
+          <ActionBar variant="primary">
+            <CheckDoubleIcon />
+            <ActionBarContent>{selected.length} selected</ActionBarContent>
+            <ActionBarActions>
+              <Button
+                variant="secondary"
+                onClick={() => setSelected(dir.screenshots.map((x) => x.path))}
+              >
+                Select All
+              </Button>
+              <Button variant="secondary" onClick={() => setSelected([])}>
+                Select None
+              </Button>
+              <Button
+                size="icon"
+                variant="destructive"
+                onClick={() =>
+                  setConfirmDelete(dir.screenshots.filter((scr) => selected.includes(scr.path)))
+                }
+              >
+                <DeleteIcon />
+              </Button>
+            </ActionBarActions>
+          </ActionBar>
+        )}
       </div>
 
       <div className="p-4 pt-0">
@@ -179,6 +247,42 @@ function ScreenshotsGamePage() {
             activeIndex={modalIndex}
             onDeleteScreenshot={handleDeleteScreenshot}
           />
+          <AlertDialog
+            open={Boolean(confirmDelete)}
+            onOpenChange={(s) => !s && setConfirmDelete(null)}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Are you sure you want to delete{' '}
+                  {selected.length === 1 ? 'this screenshot' : 'these screenshots'}?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  <b>
+                    You are about to delete {selected.length}{' '}
+                    {selected.length === 1 ? 'screenshot' : 'screenshots'}.
+                  </b>
+                  <br />
+                  <br />
+                  This action is irreversible. You will delete files entirely from the file system,
+                  not move them into the Trash.
+                  <br />
+                  <br />
+                  Are you sure you want to proceed?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={() => handleDelete(confirmDelete!)}
+                >
+                  <DeleteIcon />
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </Dialog>
       </div>
     </div>

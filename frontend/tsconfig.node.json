@@ -12,6 +12,9 @@
       "@ui/*": [
         "./src/components/ui/*"
       ],
+      "@icons": [
+        "./src/components/Icons"
+      ],
       "$app": [
         "./wailsjs/go/main/App"
       ],

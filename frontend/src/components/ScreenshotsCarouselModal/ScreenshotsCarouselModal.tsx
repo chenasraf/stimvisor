@@ -4,7 +4,7 @@ import { screenshots } from '$models'
 import { DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { ScreenshotImg } from '../ScreenshotImg/ScreenshotImg'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, ButtonProps } from '../ui/button'
+import { Button, ButtonProps } from '@ui/button'
 import { ManageScreenshot, NativeOpen } from '$app'
 import {
   AlertDialog,
@@ -15,15 +15,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../ui/alert-dialog'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
+} from '@ui/alert-dialog'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ui/tooltip'
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   DeleteIcon,
   ExternalLinkIcon,
   OpenFolderIcon,
-} from '../Icons/Icons'
+} from '@icons'
 
 export function ScreenshotsCarouselModal(
   props: HtmlProps<'div'> & {
@@ -37,7 +37,6 @@ export function ScreenshotsCarouselModal(
   useEffect(() => {
     setIdx(activeIndex ?? 0)
   }, [activeIndex])
-  const [confirmDelete, setConfirmDelete] = useState(false)
   const visible = useMemo(() => {
     const thresh = 1
     const min = idx - thresh
@@ -58,7 +57,7 @@ export function ScreenshotsCarouselModal(
     [screenshots.length],
   )
   const nextScreenshot = useCallback(
-    () => setIdx((i) => (i === screenshots.length ? 0 : ++i)),
+    () => setIdx((i) => (i === screenshots.length - 1 ? 0 : ++i)),
     [screenshots.length],
   )
 
@@ -66,17 +65,20 @@ export function ScreenshotsCarouselModal(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       if (e.key === 'ArrowRight') {
         e.preventDefault()
+        e.stopPropagation()
         nextScreenshot()
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault()
+        e.stopPropagation()
         prevScreenshot()
       }
     },
     [nextScreenshot, prevScreenshot],
   )
 
-  const handleDelete = useCallback(() => {
-    ManageScreenshot(screenshots[idx].path, 'delete')
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const handleDelete = useCallback(async () => {
+    await ManageScreenshot([screenshots[idx].path], 'delete')
     onDeleteScreenshot?.(idx, screenshots[idx].path)
   }, [idx, onDeleteScreenshot, screenshots])
 
@@ -118,7 +120,7 @@ export function ScreenshotsCarouselModal(
               <ScreenshotImg
                 key={scr.path}
                 screenshot={scr}
-                className={cn('max-h-[calc(100vh_-_220px)] object-cover', i !== 1 && 'hidden')}
+                imgClassName={cn('max-h-[calc(100vh_-_220px)] object-cover', i !== 1 && 'hidden')}
               />
             ))}
           </div>

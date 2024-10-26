@@ -138,8 +138,14 @@ func (a *App) GetScreenshotsForGame(gameId string) ScreenshotCollectionResponse 
 	return ScreenshotCollectionResponse{ScreenshotCollections: []screenshots.ScreenshotCollection{screenshotsDir}}
 }
 
-func (a *App) ManageScreenshot(path string, action string) error {
-	return screenshots.ManageScreenshot(path, screenshots.ScreensotAction(action))
+func (a *App) ManageScreenshot(path []string, action string) error {
+	for _, p := range path {
+		err := screenshots.ManageScreenshot(p, screenshots.ScreensotAction(action))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type GamesResponse struct {

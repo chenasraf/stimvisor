@@ -9,3 +9,5 @@ export function {{pascalCase name}}({ className, ...rest }: HtmlProps<'div'>) {
     </div>
   )
 }
+
+export default {{pascalCase name}}

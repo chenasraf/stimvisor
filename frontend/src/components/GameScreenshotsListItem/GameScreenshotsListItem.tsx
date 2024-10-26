@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'
 import { NativeOpen } from '$app'
 import { ScreenshotImg } from '@/components/ScreenshotImg/ScreenshotImg'
 import { useMemo } from 'react'
-import { OpenFolderIcon } from '../Icons/Icons'
+import { OpenFolderIcon } from '@icons'
 
 export function GameScreenshotsListItem({
   className,
